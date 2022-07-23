@@ -39,6 +39,40 @@ func processBigInt(i *big.Int) (cadence.Value, error) {
 	return nil, fmt.Errorf("unsupport big.Int value: %s", i.Text(10))
 }
 
+// processStruct
+func processStruct(value any) (cadence.Value, error) {
+	reflectV := reflect.ValueOf(value)
+	fields := []cadence.Value{}
+
+	// convert fields to cadence
+	for index := 0; index < reflectV.NumField(); index++ {
+		cadenceValue, err := ToCadence(reflectV.Field(index).Interface())
+		if err != nil {
+			return nil, err
+		}
+		fields = append(fields, cadenceValue)
+	}
+
+	// add field names to struct type
+	nameFields := []cadence.Field{}
+	reflectT := reflect.TypeOf(value)
+	for index, v := range fields {
+		nameFields = append(nameFields, cadence.NewField(reflectT.Field(index).Name, v.Type()))
+	}
+
+	// add type to struct
+	t := &cadence.StructType{
+		QualifiedIdentifier: reflectT.Name(), // TODO: Why Invalid?
+		Fields:              nameFields,
+	}
+	// new a cadence struct
+	ret := cadence.Struct{
+		StructType: t,
+		Fields:     fields,
+	}
+	return ret, nil
+}
+
 // ToCadence Convert any go value to cadence value.
 // Type uint64 will convert to UInt64, if you want to convert to UFix64,
 // you should wrap the field in a struct and tagged it with `godence:"type:UFix64"`, or use our UFix64 type.
@@ -77,6 +111,10 @@ func ToCadence(value any) (cadence.Value, error) {
 	case string:
 		return cadence.NewString(v)
 	}
+	// TODO: how to convert struct?
+	// if reflect.TypeOf(value).Kind() == reflect.Struct {
+	// 	return processStruct(value)
+	// }
 	return nil, fmt.Errorf("unsupport type: %s", reflect.TypeOf(value))
 }
 

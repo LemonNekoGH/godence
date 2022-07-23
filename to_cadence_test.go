@@ -224,6 +224,16 @@ func TestToCadence(t *testing.T) {
 		assert.NoError(err)
 		assert.Equal(ret.Type().ID(), "Void")
 	})
+	t.Run("larger than u256 max value, should error", func(t *testing.T) {
+		assert := assert.New(t)
+		// make a new big int
+		bigInt := &big.Int{}
+		bigInt, ok := bigInt.SetString("115792089237316195423570985008687907853269984665640564039457584007913129639936", 10)
+		assert.True(ok)
+
+		_, err := ToCadence(bigInt)
+		assert.Error(err)
+	})
 	t.Run("to fix64", func(t *testing.T) {
 		assert := assert.New(t)
 		script := []byte(`pub fun main(arg: Fix64) { log("the arg is ".concat(arg.toString())) }`)
@@ -511,4 +521,35 @@ func TestToCadence(t *testing.T) {
 		assert.NoError(err)
 		assert.Equal(ret.Type().ID(), "Void")
 	})
+	// ==========
+	// Structs
+	// ==========
+	// TODO:
+	// 	t.Run("a simple struct", func(t *testing.T) {
+	// 		assert := assert.New(t)
+	// 		script := []byte(`
+	// pub struct SimpleStruct {
+	// 	pub var A: Int
+
+	// 	init() {
+	// 		self.A = 0
+	// 	}
+	// }
+
+	// pub fun main(arg: SimpleStruct) {
+	// 	log("the arg is ".concat(arg.A.toString()))
+	// }`)
+
+	// 		type SimpleStruct struct {
+	// 			A int
+	// 		}
+
+	// 		cadenceValue, err := ToCadence(SimpleStruct{A: 15})
+	// 		assert.NoError(err)
+
+	// 		args := []cadence.Value{cadenceValue}
+	// 		ret, err := flowCli.ExecuteScriptAtLatestBlock(context.Background(), script, args)
+	// 		assert.NoError(err)
+	// 		assert.Equal(ret.Type().ID(), "Void")
+	// 	})
 }

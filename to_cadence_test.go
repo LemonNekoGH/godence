@@ -553,3 +553,28 @@ func TestToCadence(t *testing.T) {
 	// 		assert.Equal(ret.Type().ID(), "Void")
 	// 	})
 }
+
+// This test is not for any function
+func TestTryToGetSomething(t *testing.T) {
+	t.Run("try to get a cadence Struct name", func(t *testing.T) {
+		assert := assert.New(t)
+		// return a value from cadence, try to get it name
+		script := []byte(`
+pub struct SimpleStruct {
+	pub var A: Int
+
+	init() {
+		self.A = 0
+	}
+}
+
+pub fun main(): SimpleStruct {
+	return SimpleStruct()
+}`)
+
+		ret, err := flowCli.ExecuteScriptAtLatestBlock(context.Background(), script, nil)
+		assert.NoError(err)
+		// yeah! i got it.
+		assert.Equal(ret.Type().ID(), "s.b37650809c8bd4cb0827a55bc447099f8f8ac555ef5308bfc287f757557430ef.SimpleStruct")
+	})
+}

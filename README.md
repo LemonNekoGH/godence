@@ -31,7 +31,7 @@
 - [x] Go `string` to Cadence `String`
 - [ ] Go `?` to Cadence `Path`
 - [ ] Go `?` to Cadence `Address`
-- [ ] Go `?` to Cadence `Bool`
+- [x] Go `bool` to Cadence `Bool`
 - [ ] Go `?` to Cadence `Array`
 - [ ] Go `?` to Cadence `Struct`
 - [ ] Go `?` to Cadence `Character`
@@ -62,7 +62,7 @@
 - [x] Cadence `String` to Go `string`
 - [ ] Cadence `Path` to Go `?`
 - [x] Cadence `Address` to Go `string` or `cadence.Address` or `[8]uint8`
-- [ ] Cadence `Bool` to Go `?`
+- [x] Cadence `Bool` to Go `bool`
 - [ ] Cadence `Array` to Go `?`
 - [ ] Cadence `Struct` to Go `?`
 - [ ] Cadence `Character` to Go `?`

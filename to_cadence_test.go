@@ -521,6 +521,32 @@ func TestToCadence(t *testing.T) {
 		assert.NoError(err)
 		assert.Equal(ret.Type().ID(), "Void")
 	})
+	t.Run("to Bool", func(t *testing.T) {
+		assert := assert.New(t)
+		script := []byte(`pub fun main(arg: Bool) { log(arg) }`)
+
+		cadenceValue, err := ToCadence(true)
+		assert.NoError(err)
+		assert.Equal(cadenceValue.Type().ID(), "Bool")
+
+		args := []cadence.Value{cadenceValue}
+		ret, err := flowCli.ExecuteScriptAtLatestBlock(context.Background(), script, args)
+		assert.NoError(err)
+		assert.Equal(ret.Type().ID(), "Void")
+	})
+	t.Run("to Bool?", func(t *testing.T) {
+		assert := assert.New(t)
+		script := []byte(`pub fun main(arg: Bool?) { log(arg) }`)
+
+		cadenceValue, err := ToCadenceOptional(true)
+		assert.NoError(err)
+		assert.Equal(cadenceValue.Type().ID(), "Bool?")
+
+		args := []cadence.Value{cadenceValue}
+		ret, err := flowCli.ExecuteScriptAtLatestBlock(context.Background(), script, args)
+		assert.NoError(err)
+		assert.Equal(ret.Type().ID(), "Void")
+	})
 	// ==========
 	// Structs
 	// ==========

@@ -309,4 +309,17 @@ func TestToGo(t *testing.T) {
 		assert.NoError(err)
 		assert.Equal(cadence.Address{0, 0, 0, 0, 0, 0, 0, 0}, dist)
 	})
+	t.Run("Bool convert to bool", func(t *testing.T) {
+		assert := assert.New(t)
+		script := []byte(`pub fun main(): Bool { return true }`)
+
+		ret, err := flowCli.ExecuteScriptAtLatestBlock(context.Background(), script, nil)
+		assert.NoError(err)
+		assert.Equal(ret.Type().ID(), "Bool")
+
+		var dist bool
+		err = ToGo(ret, &dist)
+		assert.NoError(err)
+		assert.True(dist)
+	})
 }

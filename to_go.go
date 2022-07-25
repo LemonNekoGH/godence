@@ -66,6 +66,9 @@ func ToGo(value cadence.Value, dist any) (err error) {
 	case *cadence.Address: // Address
 		*v = value.(cadence.Address)
 		return nil
+	case *bool:
+		*v = value.ToGoValue().(bool)
+		return nil
 	}
 	// check if panic recovered
 	if err != nil {

@@ -110,6 +110,8 @@ func ToCadence(value any) (cadence.Value, error) {
 	// case float64:
 	case string:
 		return cadence.NewString(v)
+	case bool:
+		return cadence.NewBool(v), nil
 	}
 	// TODO: how to convert struct?
 	// if reflect.TypeOf(value).Kind() == reflect.Struct {

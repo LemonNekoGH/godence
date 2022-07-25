@@ -63,6 +63,196 @@ func TestToGo(t *testing.T) {
 		assert.NoError(err)
 		assert.Equal(dist, int8(127))
 	})
+	t.Run("convert to int16", func(t *testing.T) {
+		assert := assert.New(t)
+		script := []byte(`pub fun main(): Int16 { return 127 }`)
+
+		ret, err := flowCli.ExecuteScriptAtLatestBlock(context.Background(), script, nil)
+		assert.NoError(err)
+		assert.Equal(ret.Type().ID(), "Int16")
+
+		var dist int16
+		err = ToGo(ret, &dist)
+		assert.NoError(err)
+		assert.Equal(dist, int16(127))
+	})
+	t.Run("convert to int32", func(t *testing.T) {
+		assert := assert.New(t)
+		script := []byte(`pub fun main(): Int32 { return 127 }`)
+
+		ret, err := flowCli.ExecuteScriptAtLatestBlock(context.Background(), script, nil)
+		assert.NoError(err)
+		assert.Equal(ret.Type().ID(), "Int32")
+
+		var dist int32
+		err = ToGo(ret, &dist)
+		assert.NoError(err)
+		assert.Equal(dist, int32(127))
+	})
+	t.Run("convert to int64", func(t *testing.T) {
+		assert := assert.New(t)
+		script := []byte(`pub fun main(): Int64 { return 127 }`)
+
+		ret, err := flowCli.ExecuteScriptAtLatestBlock(context.Background(), script, nil)
+		assert.NoError(err)
+		assert.Equal(ret.Type().ID(), "Int64")
+
+		var dist int64
+		err = ToGo(ret, &dist)
+		assert.NoError(err)
+		assert.Equal(dist, int64(127))
+	})
+	t.Run("cadence Int128 is big.Int", func(t *testing.T) {
+		assert := assert.New(t)
+		script := []byte(`pub fun main(): Int128 { return 127 }`)
+
+		ret, err := flowCli.ExecuteScriptAtLatestBlock(context.Background(), script, nil)
+		assert.NoError(err)
+		assert.Equal(ret.Type().ID(), "Int128")
+
+		var dist *big.Int
+		err = ToGo(ret, &dist)
+		expect := big.NewInt(127)
+		assert.NoError(err)
+		assert.Equal(expect, dist)
+	})
+	t.Run("cadence Int256 is big.Int", func(t *testing.T) {
+		assert := assert.New(t)
+		script := []byte(`pub fun main(): Int256 { return 127 }`)
+
+		ret, err := flowCli.ExecuteScriptAtLatestBlock(context.Background(), script, nil)
+		assert.NoError(err)
+		assert.Equal(ret.Type().ID(), "Int256")
+
+		var dist *big.Int
+		err = ToGo(ret, &dist)
+		expect := big.NewInt(127)
+		assert.NoError(err)
+		assert.Equal(expect, dist)
+	})
+	t.Run("Fix64 convert to int64", func(t *testing.T) {
+		assert := assert.New(t)
+		script := []byte(`pub fun main(): Fix64 { return 127.0 }`)
+
+		ret, err := flowCli.ExecuteScriptAtLatestBlock(context.Background(), script, nil)
+		assert.NoError(err)
+		assert.Equal(ret.Type().ID(), "Fix64")
+
+		var dist int64
+		err = ToGo(ret, &dist)
+		assert.NoError(err)
+		assert.Equal(dist, int64(12700000000))
+	})
+	// =============
+	// unsigned integers
+	// =============
+	t.Run("cadence UInt is big.Int", func(t *testing.T) {
+		assert := assert.New(t)
+		script := []byte(`pub fun main(): UInt { return 127 }`)
+
+		ret, err := flowCli.ExecuteScriptAtLatestBlock(context.Background(), script, nil)
+		assert.NoError(err)
+		assert.Equal(ret.Type().ID(), "UInt")
+
+		var dist *big.Int
+		err = ToGo(ret, &dist)
+		expect := big.NewInt(127)
+		assert.NoError(err)
+		assert.Equal(expect, dist)
+	})
+	t.Run("convert to uint8", func(t *testing.T) {
+		assert := assert.New(t)
+		script := []byte(`pub fun main(): UInt8 { return 127 }`)
+
+		ret, err := flowCli.ExecuteScriptAtLatestBlock(context.Background(), script, nil)
+		assert.NoError(err)
+		assert.Equal(ret.Type().ID(), "UInt8")
+
+		var dist uint8
+		err = ToGo(ret, &dist)
+		assert.NoError(err)
+		assert.Equal(dist, uint8(127))
+	})
+	t.Run("convert to uint16", func(t *testing.T) {
+		assert := assert.New(t)
+		script := []byte(`pub fun main(): UInt16 { return 127 }`)
+
+		ret, err := flowCli.ExecuteScriptAtLatestBlock(context.Background(), script, nil)
+		assert.NoError(err)
+		assert.Equal(ret.Type().ID(), "UInt16")
+
+		var dist uint16
+		err = ToGo(ret, &dist)
+		assert.NoError(err)
+		assert.Equal(dist, uint16(127))
+	})
+	t.Run("convert to uint32", func(t *testing.T) {
+		assert := assert.New(t)
+		script := []byte(`pub fun main(): UInt32 { return 127 }`)
+
+		ret, err := flowCli.ExecuteScriptAtLatestBlock(context.Background(), script, nil)
+		assert.NoError(err)
+		assert.Equal(ret.Type().ID(), "UInt32")
+
+		var dist uint32
+		err = ToGo(ret, &dist)
+		assert.NoError(err)
+		assert.Equal(dist, uint32(127))
+	})
+	t.Run("convert to uint64", func(t *testing.T) {
+		assert := assert.New(t)
+		script := []byte(`pub fun main(): UInt64 { return 127 }`)
+
+		ret, err := flowCli.ExecuteScriptAtLatestBlock(context.Background(), script, nil)
+		assert.NoError(err)
+		assert.Equal(ret.Type().ID(), "UInt64")
+
+		var dist uint64
+		err = ToGo(ret, &dist)
+		assert.NoError(err)
+		assert.Equal(dist, uint64(127))
+	})
+	t.Run("cadence UInt128 is big.Int", func(t *testing.T) {
+		assert := assert.New(t)
+		script := []byte(`pub fun main(): UInt128 { return 127 }`)
+
+		ret, err := flowCli.ExecuteScriptAtLatestBlock(context.Background(), script, nil)
+		assert.NoError(err)
+		assert.Equal(ret.Type().ID(), "UInt128")
+
+		var dist *big.Int
+		err = ToGo(ret, &dist)
+		expect := big.NewInt(127)
+		assert.NoError(err)
+		assert.Equal(expect, dist)
+	})
+	t.Run("cadence UInt256 is big.Int", func(t *testing.T) {
+		assert := assert.New(t)
+		script := []byte(`pub fun main(): UInt256 { return 127 }`)
+
+		ret, err := flowCli.ExecuteScriptAtLatestBlock(context.Background(), script, nil)
+		assert.NoError(err)
+		assert.Equal(ret.Type().ID(), "UInt256")
+
+		var dist *big.Int
+		err = ToGo(ret, &dist)
+		expect := big.NewInt(127)
+		assert.NoError(err)
+		assert.Equal(expect, dist)
+	})
+	t.Run("UFix64 convert to uint64", func(t *testing.T) {
+		assert := assert.New(t)
+		script := []byte(`pub fun main(): UFix64 { return 127.0 }`)
+
+		ret, err := flowCli.ExecuteScriptAtLatestBlock(context.Background(), script, nil)
+		assert.NoError(err)
+		assert.Equal(ret.Type().ID(), "UFix64")
+
+		var dist uint64
+		err = ToGo(ret, &dist)
+		assert.NoError(err)
+		assert.Equal(dist, uint64(12700000000))
+	})
 	// =============
 	// strings
 	// =============

@@ -43,21 +43,21 @@
 ### Integers
 - [x] Cadence `Int` to Go `*big.Int`
 - [x] Cadence `Int8` to Go `int8`
-- [ ] Cadence `Int16` to Go `int16`
-- [ ] Cadence `Int32` to Go `int32`
-- [ ] Cadence `Int64` to Go `int64`
-- [ ] Cadence `Int128` to Go `*big.Int`
-- [ ] Cadence `Int256` to Go `*big.Int`
-- [ ] Cadence `UInt` to Go `*big.Int`
-- [ ] Cadence `UInt8` to Go `uint8`
-- [ ] Cadence `UInt16` to Go `uint16`
-- [ ] Cadence `UInt32` to Go `uint32`
-- [ ] Cadence `UInt64` to Go `uint64`
-- [ ] Cadence `UInt128` to Go `*big.Int`
-- [ ] Cadence `UInt256` to Go `*big.Int`
+- [x] Cadence `Int16` to Go `int16`
+- [x] Cadence `Int32` to Go `int32`
+- [x] Cadence `Int64` to Go `int64`
+- [x] Cadence `Int128` to Go `*big.Int`
+- [x] Cadence `Int256` to Go `*big.Int`
+- [x] Cadence `UInt` to Go `*big.Int`
+- [x] Cadence `UInt8` to Go `uint8`
+- [x] Cadence `UInt16` to Go `uint16`
+- [x] Cadence `UInt32` to Go `uint32`
+- [x] Cadence `UInt64` to Go `uint64`
+- [x] Cadence `UInt128` to Go `*big.Int`
+- [x] Cadence `UInt256` to Go `*big.Int`
 ### Fixed-Point Numbers
-- [ ] Cadence `Fix64` to Go `int64`
-- [ ] Cadence `UFix64` to Go `uint64`
+- [x] Cadence `Fix64` to Go `int64`
+- [x] Cadence `UFix64` to Go `uint64`
 ### Other
 - [x] Cadence `String` to Go `string`
 - [ ] Cadence `Path` to Go `?`

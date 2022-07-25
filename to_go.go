@@ -11,6 +11,7 @@ import (
 // ToGo. Convert cadence types to go.
 // Param 1: cadence value to convert.
 // Param 2: go pointer.
+// Address convert to string, will have 0x prefix.
 func ToGo(value cadence.Value, dist any) (err error) {
 	// type cast may be failed, should recover panic
 	defer func() {
@@ -22,7 +23,7 @@ func ToGo(value cadence.Value, dist any) (err error) {
 	}()
 	switch v := dist.(type) {
 	// integers
-	case **big.Int:
+	case **big.Int: // Cadence Int, Int128, Int256, UInt, UInt128, UInt256
 		*v = value.ToGoValue().(*big.Int)
 		return nil
 	case *int8:
@@ -34,7 +35,7 @@ func ToGo(value cadence.Value, dist any) (err error) {
 	case *int32:
 		*v = value.ToGoValue().(int32)
 		return nil
-	case *int64:
+	case *int64: // Cadence Int64, Fix64
 		*v = value.ToGoValue().(int64)
 		return nil
 	// unsigned integers
@@ -47,12 +48,23 @@ func ToGo(value cadence.Value, dist any) (err error) {
 	case *uint32:
 		*v = value.ToGoValue().(uint32)
 		return nil
-	case *uint64:
+	case *uint64: // Cadence UInt64, UFix64
 		*v = value.ToGoValue().(uint64)
 		return nil
 	// other
-	case *string:
+	case *string: // Cadence String, Address
+		switch cv := value.(type) {
+		case cadence.Address:
+			*v = cv.String()
+			return
+		}
 		*v = value.ToGoValue().(string)
+		return nil
+	case *[8]uint8: // Address
+		*v = value.ToGoValue().([8]uint8)
+		return nil
+	case *cadence.Address: // Address
+		*v = value.(cadence.Address)
 		return nil
 	}
 	// check if panic recovered

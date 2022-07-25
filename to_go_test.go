@@ -5,6 +5,7 @@ import (
 	"math/big"
 	"testing"
 
+	"github.com/onflow/cadence"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -268,5 +269,44 @@ func TestToGo(t *testing.T) {
 		err = ToGo(ret, &dist)
 		assert.NoError(err)
 		assert.Equal("Hello", dist)
+	})
+	t.Run("Address convert to string", func(t *testing.T) {
+		assert := assert.New(t)
+		script := []byte(`pub fun main(): Address { return 0x0 }`)
+
+		ret, err := flowCli.ExecuteScriptAtLatestBlock(context.Background(), script, nil)
+		assert.NoError(err)
+		assert.Equal(ret.Type().ID(), "Address")
+
+		var dist string
+		err = ToGo(ret, &dist)
+		assert.NoError(err)
+		assert.Equal("0x0000000000000000", dist)
+	})
+	t.Run("Address convert to [8]uint8", func(t *testing.T) {
+		assert := assert.New(t)
+		script := []byte(`pub fun main(): Address { return 0x0 }`)
+
+		ret, err := flowCli.ExecuteScriptAtLatestBlock(context.Background(), script, nil)
+		assert.NoError(err)
+		assert.Equal(ret.Type().ID(), "Address")
+
+		var dist [8]uint8
+		err = ToGo(ret, &dist)
+		assert.NoError(err)
+		assert.Equal([8]uint8{0, 0, 0, 0, 0, 0, 0, 0}, dist)
+	})
+	t.Run("Address convert to cadence.Address", func(t *testing.T) {
+		assert := assert.New(t)
+		script := []byte(`pub fun main(): Address { return 0x0 }`)
+
+		ret, err := flowCli.ExecuteScriptAtLatestBlock(context.Background(), script, nil)
+		assert.NoError(err)
+		assert.Equal(ret.Type().ID(), "Address")
+
+		var dist cadence.Address
+		err = ToGo(ret, &dist)
+		assert.NoError(err)
+		assert.Equal(cadence.Address{0, 0, 0, 0, 0, 0, 0, 0}, dist)
 	})
 }

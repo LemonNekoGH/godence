@@ -61,7 +61,7 @@
 ### Other
 - [x] Cadence `String` to Go `string`
 - [ ] Cadence `Path` to Go `?`
-- [ ] Cadence `Address` to Go `?`
+- [x] Cadence `Address` to Go `string` or `cadence.Address` or `[8]uint8`
 - [ ] Cadence `Bool` to Go `?`
 - [ ] Cadence `Array` to Go `?`
 - [ ] Cadence `Struct` to Go `?`

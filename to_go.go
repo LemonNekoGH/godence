@@ -8,6 +8,66 @@ import (
 	"github.com/onflow/cadence"
 )
 
+// getCadenceStructFieldByName. find cadence field by go field name.
+func getCadenceStructFieldByName(name string, value cadence.Struct) (cadence.Value, error) {
+	for index, field := range value.StructType.Fields {
+		if name == field.Identifier {
+			return value.Fields[index], nil
+		}
+	}
+	// not found, return void and error
+	return cadence.NewVoid(), fmt.Errorf("cannot find field named %s in cadence struct", name)
+}
+
+// structToGoStruct
+func structToGoStruct(value cadence.Struct, dist any) (err error) {
+	distT := reflect.TypeOf(dist)
+	distV := reflect.ValueOf(dist)
+
+	defer func() {
+		if msg := recover(); msg != nil {
+			err = fmt.Errorf("structToGoStruct, panic recoverd: %v", msg)
+		}
+	}()
+
+	// traverse all dist fields.
+	for fieldIndex := 0; fieldIndex < distT.Elem().NumField(); fieldIndex++ {
+		fieldT := distT.Elem().Field(fieldIndex)
+		fieldV := distV.Elem().Field(fieldIndex)
+		// cannot set, skip
+		if !fieldV.CanSet() {
+			fmt.Printf("structToGoStruct: cannot set %s.%s", distT.Name(), fieldT.Name)
+			continue
+		}
+		// find cadence field by go field
+		fieldName := fieldT.Name
+		if tagValue, ok := fieldT.Tag.Lookup("godence"); ok {
+			// get cadence field name specified by tag
+			fieldName = tagValue
+		}
+		fmt.Printf("structToGoStruct: setting %s.%s", distT.Name(), fieldT.Name)
+		// if error, continue
+		if v, err := getCadenceStructFieldByName(fieldName, value); err == nil {
+			switch fieldV.Kind() {
+			case reflect.String:
+				fieldV.SetString(v.ToGoValue().(string))
+			}
+		} else if err != nil {
+			return err
+		}
+	}
+	return
+}
+
+// toGoStruct. call this function if type of dist is struct kind.
+func toGoStruct(value cadence.Value, dist any) error {
+	switch v := value.(type) {
+	case cadence.Struct:
+		return structToGoStruct(v, dist)
+	}
+	return fmt.Errorf("to go struct: unsupport cadence type: %s", reflect.TypeOf(value))
+}
+
 // ToGo. Convert cadence types to go.
 // Param 1: cadence value to convert.
 // Param 2: go pointer.
@@ -70,6 +130,14 @@ func ToGo(value cadence.Value, dist any) (err error) {
 		*v = value.ToGoValue().(bool)
 		return nil
 	}
+	switch reflect.TypeOf(dist).Kind() {
+	// try to convert to struct type
+	case reflect.Pointer:
+		if reflect.TypeOf(dist).Elem().Kind() == reflect.Struct {
+			toGoStruct(value, dist)
+		}
+	}
+
 	// check if panic recovered
 	if err != nil {
 		return err

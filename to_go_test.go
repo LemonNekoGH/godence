@@ -323,3 +323,31 @@ func TestToGo(t *testing.T) {
 		assert.True(dist)
 	})
 }
+
+// test for structToGoStruct
+func TestToGoStruct(t *testing.T) {
+	t.Run("a simple struct", func(t *testing.T) {
+		type simpleStruct struct {
+			MyName string
+		}
+		assert := assert.New(t)
+		script := []byte(`
+pub struct SimpleStruct {
+	pub var MyName: String
+
+	init() {
+		self.MyName = "LemonNeko"
+	}
+}
+pub fun main(): SimpleStruct {
+	return SimpleStruct()
+}`)
+		ret, err := flowCli.ExecuteScriptAtLatestBlock(context.Background(), script, nil)
+		assert.NoError(err)
+
+		dist := simpleStruct{}
+		err = toGoStruct(ret, &dist)
+		assert.NoError(err)
+		assert.Equal("LemonNeko", dist.MyName)
+	})
+}

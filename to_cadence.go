@@ -17,8 +17,8 @@ type UFix64 uint64
 // helper for fix64
 type Fix64 int64
 
-// processBigInt
-func processBigInt(i *big.Int) (cadence.Value, error) {
+// bigIntToCadence
+func bigIntToCadence(i *big.Int) (cadence.Value, error) {
 	// should from small to big
 	i128, err := cadence.NewInt128FromBig(i)
 	if err == nil {
@@ -39,8 +39,8 @@ func processBigInt(i *big.Int) (cadence.Value, error) {
 	return nil, fmt.Errorf("unsupport big.Int value: %s", i.Text(10))
 }
 
-// processStruct
-func processStruct(value any) (cadence.Value, error) {
+// structToCadence
+func structToCadence(value any) (cadence.Value, error) {
 	reflectV := reflect.ValueOf(value)
 	fields := []cadence.Value{}
 
@@ -104,7 +104,7 @@ func ToCadence(value any) (cadence.Value, error) {
 	case UFix64:
 		return cadence.NewUFix64(fmt.Sprintf("%d.0", uint64(v)))
 	case *big.Int:
-		return processBigInt(v)
+		return bigIntToCadence(v)
 	// TODO: float, should float convert to Fix64?
 	// case float32:
 	// case float64:

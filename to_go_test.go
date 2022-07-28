@@ -350,4 +350,225 @@ pub fun main(): SimpleStruct {
 		assert.NoError(err)
 		assert.Equal("LemonNeko", dist.MyName)
 	})
+
+	t.Run("a simple struct, but no any field exported", func(t *testing.T) {
+		type simpleStruct struct {
+			myName string
+		}
+		assert := assert.New(t)
+		script := []byte(`
+pub struct SimpleStruct {
+	pub var MyName: String
+
+	init() {
+		self.MyName = "LemonNeko"
+	}
+}
+pub fun main(): SimpleStruct {
+	return SimpleStruct()
+}`)
+		ret, err := flowCli.ExecuteScriptAtLatestBlock(context.Background(), script, nil)
+		assert.NoError(err)
+
+		dist := simpleStruct{}
+		err = toGoStruct(ret, &dist)
+		assert.NoError(err)
+		assert.Equal("", dist.myName)
+	})
+
+	t.Run("a simple struct, with field name tag", func(t *testing.T) {
+		type simpleStruct struct {
+			MyName string `godence:"myName"`
+		}
+		assert := assert.New(t)
+		script := []byte(`
+pub struct SimpleStruct {
+	pub var myName: String
+
+	init() {
+		self.myName = "LemonNeko"
+	}
+}
+pub fun main(): SimpleStruct {
+	return SimpleStruct()
+}`)
+		ret, err := flowCli.ExecuteScriptAtLatestBlock(context.Background(), script, nil)
+		assert.NoError(err)
+
+		dist := simpleStruct{}
+		err = toGoStruct(ret, &dist)
+		assert.NoError(err)
+		assert.Equal("LemonNeko", dist.MyName)
+	})
+
+	t.Run("a simple struct, with wrong field name tag", func(t *testing.T) {
+		type simpleStruct struct {
+			MyName string `godence:"none"`
+		}
+		assert := assert.New(t)
+		script := []byte(`
+pub struct SimpleStruct {
+	pub var myName: String
+
+	init() {
+		self.myName = "LemonNeko"
+	}
+}
+pub fun main(): SimpleStruct {
+	return SimpleStruct()
+}`)
+		ret, err := flowCli.ExecuteScriptAtLatestBlock(context.Background(), script, nil)
+		assert.NoError(err)
+
+		dist := simpleStruct{}
+		err = toGoStruct(ret, &dist)
+		assert.EqualError(err, "cannot find field named none in cadence struct")
+	})
+
+	t.Run("a simple struct, with wrong type", func(t *testing.T) {
+		type simpleStruct struct {
+			MyName string `godence:"myName"`
+		}
+		assert := assert.New(t)
+		script := []byte(`
+pub struct SimpleStruct {
+	pub var myName: UInt8
+
+	init() {
+		self.myName = 127
+	}
+}
+pub fun main(): SimpleStruct {
+	return SimpleStruct()
+}`)
+		ret, err := flowCli.ExecuteScriptAtLatestBlock(context.Background(), script, nil)
+		assert.NoError(err)
+
+		dist := simpleStruct{}
+		err = toGoStruct(ret, &dist)
+		assert.EqualError(err, "structToGoStruct, panic recoverd: reflect.Set: value of type uint8 is not assignable to type string")
+	})
+
+	t.Run("a struct contains many type", func(t *testing.T) {
+		type structContainsManyType struct {
+			IntValue     *big.Int `godence:"intValue"`
+			Int8Value    int8     `godence:"int8Value"`
+			Int16Value   int16    `godence:"int16Value"`
+			Int32Value   int32    `godence:"int32Value"`
+			Int64Value   int64    `godence:"int64Value"`
+			Int128Value  *big.Int `godence:"int128Value"`
+			Int256Value  *big.Int `godence:"int256Value"`
+			UIntValue    *big.Int `godence:"uintValue"`
+			UInt8Value   uint8    `godence:"uint8Value"`
+			UInt16Value  uint16   `godence:"uint16Value"`
+			UInt32Value  uint32   `godence:"uint32Value"`
+			UInt64Value  uint64   `godence:"uint64Value"`
+			UInt128Value *big.Int `godence:"uint128Value"`
+			UInt256Value *big.Int `godence:"uint256Value"`
+			StringValue  string   `godence:"stringValue"`
+			AddressValue [8]uint8 `godence:"addressValue"`
+			BoolValue    bool     `godence:"boolValue"`
+		}
+		assert := assert.New(t)
+		script := []byte(`
+pub struct StructContainsManyType {
+	pub var intValue: Int
+	pub var int8Value: Int8
+	pub var int16Value: Int16
+	pub var int32Value: Int32
+	pub var int64Value: Int64
+	pub var int128Value: Int128
+	pub var int256Value: Int256
+	pub var uintValue: UInt
+	pub var uint8Value: UInt8
+	pub var uint16Value: UInt16
+	pub var uint32Value: UInt32
+	pub var uint64Value: UInt64
+	pub var uint128Value: UInt128
+	pub var uint256Value: UInt256
+	pub var stringValue: String
+	pub var addressValue: Address
+	pub var boolValue: Bool
+
+	init() {
+		self.intValue = 127
+		self.int8Value = 127
+		self.int16Value = 127
+		self.int32Value = 127
+		self.int64Value = 127
+		self.int128Value = 127
+		self.int256Value = 127
+		self.uintValue = 127
+		self.uint8Value = 127
+		self.uint16Value = 127
+		self.uint32Value = 127
+		self.uint64Value = 127
+		self.uint128Value = 127
+		self.uint256Value = 127
+		self.stringValue = "LemonNeko"
+		self.addressValue = 0x0
+		self.boolValue = true
+	}
+}
+pub fun main(): StructContainsManyType {
+	return StructContainsManyType()
+}`)
+		ret, err := flowCli.ExecuteScriptAtLatestBlock(context.Background(), script, nil)
+		assert.NoError(err)
+
+		dist := structContainsManyType{}
+		err = toGoStruct(ret, &dist)
+		assert.NoError(err)
+		assert.Equal(big.NewInt(127), dist.IntValue)
+		assert.Equal(int8(127), dist.Int8Value)
+		assert.Equal(int16(127), dist.Int16Value)
+		assert.Equal(int32(127), dist.Int32Value)
+		assert.Equal(int64(127), dist.Int64Value)
+		assert.Equal(big.NewInt(127), dist.Int128Value)
+		assert.Equal(big.NewInt(127), dist.Int256Value)
+		assert.Equal(big.NewInt(127), dist.UIntValue)
+		assert.Equal(uint8(127), dist.UInt8Value)
+		assert.Equal(uint16(127), dist.UInt16Value)
+		assert.Equal(uint32(127), dist.UInt32Value)
+		assert.Equal(uint64(127), dist.UInt64Value)
+		assert.Equal(big.NewInt(127), dist.UInt128Value)
+		assert.Equal(big.NewInt(127), dist.UInt256Value)
+		assert.Equal("LemonNeko", dist.StringValue)
+		assert.True(dist.BoolValue)
+	})
+
+	t.Run("embedded struct", func(t *testing.T) {
+		type embeddedStruct struct {
+			Inter *struct {
+				MyName string `godence:"myName"`
+			} `godence:"inter"`
+		}
+		assert := assert.New(t)
+		script := []byte(`
+	pub struct Inter {
+		pub var myName: String
+
+		init() {
+			self.myName = "LemonNeko"
+		}
+	}
+
+	pub struct EmbeddedStruct {
+		pub var inter: Inter
+
+		init() {
+			self.inter = Inter()
+		}
+	}
+	pub fun main(): EmbeddedStruct {
+		return EmbeddedStruct()
+	}`)
+		ret, err := flowCli.ExecuteScriptAtLatestBlock(context.Background(), script, nil)
+		assert.NoError(err)
+
+		dist := embeddedStruct{}
+		err = toGoStruct(ret, &dist)
+		assert.NoError(err)
+		assert.Equal("LemonNeko", dist.Inter.MyName)
+	})
 }

@@ -36,7 +36,6 @@ func structToGoStruct(value cadence.Struct, dist any) (err error) {
 		fieldV := distV.Elem().Field(fieldIndex)
 		// cannot set, skip
 		if !fieldV.CanSet() {
-			fmt.Printf("structToGoStruct: cannot set %s.%s", distT.Name(), fieldT.Name)
 			continue
 		}
 		// find cadence field by go field
@@ -45,12 +44,26 @@ func structToGoStruct(value cadence.Struct, dist any) (err error) {
 			// get cadence field name specified by tag
 			fieldName = tagValue
 		}
-		fmt.Printf("structToGoStruct: setting %s.%s", distT.Name(), fieldT.Name)
-		// if error, continue
+		// if error
 		if v, err := getCadenceStructFieldByName(fieldName, value); err == nil {
-			switch fieldV.Kind() {
-			case reflect.String:
-				fieldV.SetString(v.ToGoValue().(string))
+			if fieldV.Kind() == reflect.Pointer {
+				// if big int
+				if fieldT.Type.Elem().PkgPath() == "math/big" && fieldT.Type.Elem().Name() == "Int" {
+					fieldV.Set(reflect.ValueOf(v.ToGoValue()))
+				} else {
+					// embedded struct
+					// should use type to get kind
+					if fieldT.Type.Elem().Kind() == reflect.Struct {
+						// check nil
+						if fieldV.IsNil() {
+							// new a value
+							fieldV.Set(reflect.New(fieldT.Type.Elem()))
+						}
+						toGoStruct(v, fieldV.Interface())
+					}
+				}
+			} else {
+				fieldV.Set(reflect.ValueOf(v.ToGoValue()))
 			}
 		} else if err != nil {
 			return err

@@ -273,7 +273,41 @@ func TestToCadence(t *testing.T) {
 		assert.NoError(err)
 		assert.Equal(ret.Type().ID(), "Void")
 	})
-	// Optional
+
+	// ==========
+	// Structs
+	// ==========
+	// TODO:
+	// 	t.Run("a simple struct", func(t *testing.T) {
+	// 		assert := assert.New(t)
+	// 		script := []byte(`
+	// pub struct SimpleStruct {
+	// 	pub var A: Int
+
+	// 	init() {
+	// 		self.A = 0
+	// 	}
+	// }
+
+	// pub fun main(arg: SimpleStruct) {
+	// 	log("the arg is ".concat(arg.A.toString()))
+	// }`)
+
+	// 		type SimpleStruct struct {
+	// 			A int
+	// 		}
+
+	// 		cadenceValue, err := ToCadence(SimpleStruct{A: 15})
+	// 		assert.NoError(err)
+
+	// 		args := []cadence.Value{cadenceValue}
+	// 		ret, err := flowCli.ExecuteScriptAtLatestBlock(context.Background(), script, args)
+	// 		assert.NoError(err)
+	// 		assert.Equal(ret.Type().ID(), "Void")
+	// 	})
+}
+
+func TestToCadenceOptional(t *testing.T) {
 	t.Run("to int?", func(t *testing.T) {
 		assert := assert.New(t)
 		script := []byte(`pub fun main(arg: Int?) { log("the arg is ".concat(arg!.toString())) }`)
@@ -547,37 +581,12 @@ func TestToCadence(t *testing.T) {
 		assert.NoError(err)
 		assert.Equal(ret.Type().ID(), "Void")
 	})
-	// ==========
-	// Structs
-	// ==========
-	// TODO:
-	// 	t.Run("a simple struct", func(t *testing.T) {
-	// 		assert := assert.New(t)
-	// 		script := []byte(`
-	// pub struct SimpleStruct {
-	// 	pub var A: Int
+	t.Run("error", func(t *testing.T) {
+		assert := assert.New(t)
 
-	// 	init() {
-	// 		self.A = 0
-	// 	}
-	// }
-
-	// pub fun main(arg: SimpleStruct) {
-	// 	log("the arg is ".concat(arg.A.toString()))
-	// }`)
-
-	// 		type SimpleStruct struct {
-	// 			A int
-	// 		}
-
-	// 		cadenceValue, err := ToCadence(SimpleStruct{A: 15})
-	// 		assert.NoError(err)
-
-	// 		args := []cadence.Value{cadenceValue}
-	// 		ret, err := flowCli.ExecuteScriptAtLatestBlock(context.Background(), script, args)
-	// 		assert.NoError(err)
-	// 		assert.Equal(ret.Type().ID(), "Void")
-	// 	})
+		_, err := ToCadenceOptional(UnsupportType(""))
+		assert.EqualError(err, "unsupport type: godence.UnsupportType")
+	})
 }
 
 // This test is not for any function

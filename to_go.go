@@ -35,7 +35,7 @@ func structEventToGoStruct(value cadence.Value, dist any) (err error) {
 
 	defer func() {
 		if msg := recover(); msg != nil {
-			err = fmt.Errorf("structToGoStruct, panic recoverd: %v", msg)
+			err = fmt.Errorf("structEventToGoStruct, panic recoverd: %v", msg)
 		}
 	}()
 
@@ -77,6 +77,21 @@ func structEventToGoStruct(value cadence.Value, dist any) (err error) {
 		} else if err != nil {
 			return err
 		}
+	}
+	return
+}
+
+// toGoMap. call this function if type of dist is map kind.
+func toGoMap(value cadence.Value, dist any) (err error) {
+	defer func() {
+		if e := recover(); e != nil {
+			err = fmt.Errorf("structToGoStruct, panic recoverd: %v", e)
+		}
+	}()
+	dic := value.(cadence.Dictionary)
+	distV := reflect.ValueOf(dist)
+	for _, retEntry := range dic.Pairs {
+		distV.SetMapIndex(reflect.ValueOf(retEntry.Key.ToGoValue()), reflect.ValueOf(retEntry.Value.ToGoValue()))
 	}
 	return
 }
@@ -160,6 +175,8 @@ func ToGo(value cadence.Value, dist any) (err error) {
 		if reflect.TypeOf(dist).Elem().Kind() == reflect.Struct {
 			toGoStruct(value, dist)
 		}
+	case reflect.Map:
+		toGoMap(value, dist)
 	}
 
 	// check if panic recovered

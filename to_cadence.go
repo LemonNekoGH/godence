@@ -40,38 +40,38 @@ func bigIntToCadence(i *big.Int) (cadence.Value, error) {
 }
 
 // structToCadence
-func structToCadence(value any) (cadence.Value, error) {
-	reflectV := reflect.ValueOf(value)
-	fields := []cadence.Value{}
+// func structToCadence(value any) (cadence.Value, error) {
+// 	reflectV := reflect.ValueOf(value)
+// 	fields := []cadence.Value{}
 
-	// convert fields to cadence
-	for index := 0; index < reflectV.NumField(); index++ {
-		cadenceValue, err := ToCadence(reflectV.Field(index).Interface())
-		if err != nil {
-			return nil, err
-		}
-		fields = append(fields, cadenceValue)
-	}
+// 	// convert fields to cadence
+// 	for index := 0; index < reflectV.NumField(); index++ {
+// 		cadenceValue, err := ToCadence(reflectV.Field(index).Interface())
+// 		if err != nil {
+// 			return nil, err
+// 		}
+// 		fields = append(fields, cadenceValue)
+// 	}
 
-	// add field names to struct type
-	nameFields := []cadence.Field{}
-	reflectT := reflect.TypeOf(value)
-	for index, v := range fields {
-		nameFields = append(nameFields, cadence.NewField(reflectT.Field(index).Name, v.Type()))
-	}
+// 	// add field names to struct type
+// 	nameFields := []cadence.Field{}
+// 	reflectT := reflect.TypeOf(value)
+// 	for index, v := range fields {
+// 		nameFields = append(nameFields, cadence.NewField(reflectT.Field(index).Name, v.Type()))
+// 	}
 
-	// add type to struct
-	t := &cadence.StructType{
-		QualifiedIdentifier: reflectT.Name(), // TODO: Why Invalid?
-		Fields:              nameFields,
-	}
-	// new a cadence struct
-	ret := cadence.Struct{
-		StructType: t,
-		Fields:     fields,
-	}
-	return ret, nil
-}
+// 	// add type to struct
+// 	t := &cadence.StructType{
+// 		QualifiedIdentifier: reflectT.Name(), // TODO: Why Invalid?
+// 		Fields:              nameFields,
+// 	}
+// 	// new a cadence struct
+// 	ret := cadence.Struct{
+// 		StructType: t,
+// 		Fields:     fields,
+// 	}
+// 	return ret, nil
+// }
 
 // ToCadence Convert any go value to cadence value.
 // Type uint64 will convert to UInt64, if you want to convert to UFix64,

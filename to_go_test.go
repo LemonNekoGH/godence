@@ -3,7 +3,6 @@ package godence
 import (
 	"context"
 	"math/big"
-	"reflect"
 	"testing"
 
 	"github.com/onflow/cadence"
@@ -323,6 +322,53 @@ func TestToGo(t *testing.T) {
 		assert.NoError(err)
 		assert.True(dist)
 	})
+
+	t.Run("a simple struct", func(t *testing.T) {
+		type simpleStruct struct {
+			MyName string
+		}
+		assert := assert.New(t)
+		script := []byte(`
+pub struct SimpleStruct {
+	pub var MyName: String
+
+	init() {
+		self.MyName = "LemonNeko"
+	}
+}
+pub fun main(): SimpleStruct {
+	return SimpleStruct()
+}`)
+		ret, err := flowCli.ExecuteScriptAtLatestBlock(context.Background(), script, nil)
+		assert.NoError(err)
+
+		dist := simpleStruct{}
+		err = ToGo(ret, &dist)
+		assert.NoError(err)
+		assert.Equal("LemonNeko", dist.MyName)
+	})
+
+	t.Run("a string string dictionary", func(t *testing.T) {
+		assert := assert.New(t)
+		defer func() {
+			err := recover()
+			assert.Nil(err)
+		}()
+
+		script := []byte(`
+pub fun main(): {String: String} {
+	return {
+		"MyName": "LemonNeko"
+	}
+}`)
+		ret, err := flowCli.ExecuteScriptAtLatestBlock(context.Background(), script, nil)
+		assert.NoError(err)
+
+		dist := map[string]string{}
+		err = toGoMap(ret, dist)
+		assert.NoError(err)
+		assert.Equal("LemonNeko", dist["MyName"])
+	})
 }
 
 // test for structToGoStruct
@@ -346,6 +392,23 @@ func TestToGoStruct(t *testing.T) {
 		AddressValue [8]uint8 `godence:"addressValue"`
 		BoolValue    bool     `godence:"boolValue"`
 	}
+
+	t.Run("not a struct", func(t *testing.T) {
+		type simpleStruct struct {
+			MyName string
+		}
+		assert := assert.New(t)
+		script := []byte(`
+pub fun main(): String {
+	return "LemonNeko"
+}`)
+		ret, err := flowCli.ExecuteScriptAtLatestBlock(context.Background(), script, nil)
+		assert.NoError(err)
+
+		dist := simpleStruct{}
+		err = toGoStruct(ret, &dist)
+		assert.EqualError(err, "to go struct: unsupport cadence type: cadence.String")
+	})
 
 	t.Run("a simple struct", func(t *testing.T) {
 		type simpleStruct struct {
@@ -467,7 +530,7 @@ pub fun main(): SimpleStruct {
 
 		dist := simpleStruct{}
 		err = toGoStruct(ret, &dist)
-		assert.EqualError(err, "structToGoStruct, panic recoverd: reflect.Set: value of type uint8 is not assignable to type string")
+		assert.EqualError(err, "structEventToGoStruct, panic recoverd: reflect.Set: value of type uint8 is not assignable to type string")
 	})
 
 	t.Run("a struct contains many type", func(t *testing.T) {
@@ -685,7 +748,7 @@ transaction {
 
 		dist := simpleStruct{}
 		err = toGoStruct(result.Events[0].Value, &dist)
-		assert.EqualError(err, "structToGoStruct, panic recoverd: reflect.Set: value of type uint8 is not assignable to type string")
+		assert.EqualError(err, "structEventToGoStruct, panic recoverd: reflect.Set: value of type uint8 is not assignable to type string")
 	})
 
 	t.Run("a event contains many type", func(t *testing.T) {
@@ -759,8 +822,9 @@ transaction {
 		assert.NoError(err)
 		assert.Equal("LemonNeko", dist.P.MyName)
 	})
+}
 
-	// try to convert dictionary
+func TestToGoMap(t *testing.T) {
 	t.Run("a string string dictionary", func(t *testing.T) {
 		assert := assert.New(t)
 		defer func() {
@@ -778,12 +842,68 @@ pub fun main(): {String: String} {
 		assert.NoError(err)
 
 		dist := map[string]string{}
-		distV := reflect.ValueOf(dist)
-
-		retDic := ret.(cadence.Dictionary).Pairs
-		for _, retEntry := range retDic {
-			distV.SetMapIndex(reflect.ValueOf(retEntry.Key.ToGoValue()), reflect.ValueOf(retEntry.Value.ToGoValue()))
-		}
+		err = toGoMap(ret, dist)
+		assert.NoError(err)
 		assert.Equal("LemonNeko", dist["MyName"])
+	})
+
+	t.Run("a int64 int64 dictionary", func(t *testing.T) {
+		assert := assert.New(t)
+		defer func() {
+			err := recover()
+			assert.Nil(err)
+		}()
+
+		script := []byte(`
+pub fun main(): {Int64: Int64} {
+	return {
+		88: 64
+	}
+}`)
+		ret, err := flowCli.ExecuteScriptAtLatestBlock(context.Background(), script, nil)
+		assert.NoError(err)
+
+		dist := map[int64]int64{}
+		err = toGoMap(ret, dist)
+		assert.NoError(err)
+		assert.Equal(int64(64), dist[88])
+	})
+
+	t.Run("dictionary type mismatched", func(t *testing.T) {
+		assert := assert.New(t)
+		defer func() {
+			err := recover()
+			assert.Nil(err)
+		}()
+
+		script := []byte(`
+pub fun main(): {String: String} {
+	return {"MyName": "LemonNeko"}
+}`)
+		ret, err := flowCli.ExecuteScriptAtLatestBlock(context.Background(), script, nil)
+		assert.NoError(err)
+
+		dist := map[uint64]uint64{}
+		err = toGoMap(ret, dist)
+		assert.EqualError(err, "structToGoStruct, panic recoverd: reflect.Value.SetMapIndex: value of type string is not assignable to type uint64")
+	})
+
+	t.Run("not a dictionary", func(t *testing.T) {
+		assert := assert.New(t)
+		defer func() {
+			err := recover()
+			assert.Nil(err)
+		}()
+
+		script := []byte(`
+pub fun main(): String {
+	return "LemonNeko"
+}`)
+		ret, err := flowCli.ExecuteScriptAtLatestBlock(context.Background(), script, nil)
+		assert.NoError(err)
+
+		dist := map[string]string{}
+		err = toGoMap(ret, dist)
+		assert.EqualError(err, "structToGoStruct, panic recoverd: interface conversion: cadence.Value is cadence.String, not cadence.Dictionary")
 	})
 }

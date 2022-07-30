@@ -173,10 +173,10 @@ func ToGo(value cadence.Value, dist any) (err error) {
 	// try to convert to struct type
 	case reflect.Pointer:
 		if reflect.TypeOf(dist).Elem().Kind() == reflect.Struct {
-			toGoStruct(value, dist)
+			return toGoStruct(value, dist)
 		}
 	case reflect.Map:
-		toGoMap(value, dist)
+		return toGoMap(value, dist)
 	}
 
 	// check if panic recovered

@@ -8,19 +8,28 @@ import (
 	"github.com/onflow/cadence"
 )
 
-// getCadenceStructFieldByName. find cadence field by go field name.
-func getCadenceStructFieldByName(name string, value cadence.Struct) (cadence.Value, error) {
-	for index, field := range value.StructType.Fields {
-		if name == field.Identifier {
-			return value.Fields[index], nil
+// getFieldByName. find cadence field by go field name.
+func getFieldByName(name string, value cadence.Value) (cadence.Value, error) {
+	switch v := value.(type) {
+	case cadence.Struct:
+		for index, field := range v.StructType.Fields {
+			if name == field.Identifier {
+				return v.Fields[index], nil
+			}
+		}
+	case cadence.Event:
+		for index, field := range v.EventType.Fields {
+			if name == field.Identifier {
+				return v.Fields[index], nil
+			}
 		}
 	}
 	// not found, return void and error
-	return cadence.NewVoid(), fmt.Errorf("cannot find field named %s in cadence struct", name)
+	return cadence.NewVoid(), fmt.Errorf("cannot find field named %s in cadence struct/event", name)
 }
 
-// structToGoStruct
-func structToGoStruct(value cadence.Struct, dist any) (err error) {
+// structEventToGoStruct
+func structEventToGoStruct(value cadence.Value, dist any) (err error) {
 	distT := reflect.TypeOf(dist)
 	distV := reflect.ValueOf(dist)
 
@@ -45,7 +54,7 @@ func structToGoStruct(value cadence.Struct, dist any) (err error) {
 			fieldName = tagValue
 		}
 		// if error
-		if v, err := getCadenceStructFieldByName(fieldName, value); err == nil {
+		if v, err := getFieldByName(fieldName, value); err == nil {
 			if fieldV.Kind() == reflect.Pointer {
 				// if big int
 				if fieldT.Type.Elem().PkgPath() == "math/big" && fieldT.Type.Elem().Name() == "Int" {
@@ -76,7 +85,9 @@ func structToGoStruct(value cadence.Struct, dist any) (err error) {
 func toGoStruct(value cadence.Value, dist any) error {
 	switch v := value.(type) {
 	case cadence.Struct:
-		return structToGoStruct(v, dist)
+		return structEventToGoStruct(v, dist)
+	case cadence.Event:
+		return structEventToGoStruct(v, dist)
 	}
 	return fmt.Errorf("to go struct: unsupport cadence type: %s", reflect.TypeOf(value))
 }

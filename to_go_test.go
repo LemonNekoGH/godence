@@ -326,6 +326,26 @@ func TestToGo(t *testing.T) {
 
 // test for structToGoStruct
 func TestToGoStruct(t *testing.T) {
+	type structContainsManyType struct {
+		IntValue     *big.Int `godence:"intValue"`
+		Int8Value    int8     `godence:"int8Value"`
+		Int16Value   int16    `godence:"int16Value"`
+		Int32Value   int32    `godence:"int32Value"`
+		Int64Value   int64    `godence:"int64Value"`
+		Int128Value  *big.Int `godence:"int128Value"`
+		Int256Value  *big.Int `godence:"int256Value"`
+		UIntValue    *big.Int `godence:"uintValue"`
+		UInt8Value   uint8    `godence:"uint8Value"`
+		UInt16Value  uint16   `godence:"uint16Value"`
+		UInt32Value  uint32   `godence:"uint32Value"`
+		UInt64Value  uint64   `godence:"uint64Value"`
+		UInt128Value *big.Int `godence:"uint128Value"`
+		UInt256Value *big.Int `godence:"uint256Value"`
+		StringValue  string   `godence:"stringValue"`
+		AddressValue [8]uint8 `godence:"addressValue"`
+		BoolValue    bool     `godence:"boolValue"`
+	}
+
 	t.Run("a simple struct", func(t *testing.T) {
 		type simpleStruct struct {
 			MyName string
@@ -422,7 +442,7 @@ pub fun main(): SimpleStruct {
 
 		dist := simpleStruct{}
 		err = toGoStruct(ret, &dist)
-		assert.EqualError(err, "cannot find field named none in cadence struct")
+		assert.EqualError(err, "cannot find field named none in cadence struct/event")
 	})
 
 	t.Run("a simple struct, with wrong type", func(t *testing.T) {
@@ -450,25 +470,6 @@ pub fun main(): SimpleStruct {
 	})
 
 	t.Run("a struct contains many type", func(t *testing.T) {
-		type structContainsManyType struct {
-			IntValue     *big.Int `godence:"intValue"`
-			Int8Value    int8     `godence:"int8Value"`
-			Int16Value   int16    `godence:"int16Value"`
-			Int32Value   int32    `godence:"int32Value"`
-			Int64Value   int64    `godence:"int64Value"`
-			Int128Value  *big.Int `godence:"int128Value"`
-			Int256Value  *big.Int `godence:"int256Value"`
-			UIntValue    *big.Int `godence:"uintValue"`
-			UInt8Value   uint8    `godence:"uint8Value"`
-			UInt16Value  uint16   `godence:"uint16Value"`
-			UInt32Value  uint32   `godence:"uint32Value"`
-			UInt64Value  uint64   `godence:"uint64Value"`
-			UInt128Value *big.Int `godence:"uint128Value"`
-			UInt256Value *big.Int `godence:"uint256Value"`
-			StringValue  string   `godence:"stringValue"`
-			AddressValue [8]uint8 `godence:"addressValue"`
-			BoolValue    bool     `godence:"boolValue"`
-		}
 		assert := assert.New(t)
 		script := []byte(`
 pub struct StructContainsManyType {
@@ -570,5 +571,191 @@ pub fun main(): StructContainsManyType {
 		err = toGoStruct(ret, &dist)
 		assert.NoError(err)
 		assert.Equal("LemonNeko", dist.Inter.MyName)
+	})
+
+	t.Run("a simple event", func(t *testing.T) {
+		type simpleStruct struct {
+			MyName string
+		}
+		assert := assert.New(t)
+		script := []byte(`
+import ForTest from 0xf8d6e0586b0a20c7
+
+transaction {
+	prepare() {
+		ForTest.emitSimple()
+	}
+}
+		`)
+		tx := buildSimpleTx(script, assert)
+		err := flowCli.SendTransaction(context.Background(), *tx)
+		assert.NoError(err)
+
+		result := waitForTransactionSealed(tx, assert)
+		assert.NoError(result.Error)
+		assert.Equal(1, len(result.Events))
+		assert.Equal("A.f8d6e0586b0a20c7.ForTest.Simple", result.Events[0].Value.Type().ID())
+
+		dist := simpleStruct{}
+		err = toGoStruct(result.Events[0].Value, &dist)
+		assert.NoError(err)
+		assert.Equal("LemonNeko", dist.MyName)
+	})
+
+	t.Run("a simple event, with field name tag", func(t *testing.T) {
+		type simpleStruct struct {
+			MyName string `godence:"myName"`
+		}
+		assert := assert.New(t)
+		script := []byte(`
+import ForTest from 0xf8d6e0586b0a20c7
+
+transaction {
+	prepare() {
+		ForTest.emitSimple2()
+	}
+}
+		`)
+		tx := buildSimpleTx(script, assert)
+		err := flowCli.SendTransaction(context.Background(), *tx)
+		assert.NoError(err)
+
+		result := waitForTransactionSealed(tx, assert)
+		assert.NoError(result.Error)
+		assert.Equal(1, len(result.Events))
+		assert.Equal("A.f8d6e0586b0a20c7.ForTest.Simple2", result.Events[0].Value.Type().ID())
+
+		dist := simpleStruct{}
+		err = toGoStruct(result.Events[0].Value, &dist)
+		assert.NoError(err)
+		assert.Equal("LemonNeko", dist.MyName)
+	})
+
+	t.Run("a simple event, with wrong field name tag", func(t *testing.T) {
+		type simpleStruct struct {
+			MyName string `godence:"none"`
+		}
+		assert := assert.New(t)
+		script := []byte(`
+import ForTest from 0xf8d6e0586b0a20c7
+
+transaction {
+	prepare() {
+		ForTest.emitSimple2()
+	}
+}
+		`)
+		tx := buildSimpleTx(script, assert)
+		err := flowCli.SendTransaction(context.Background(), *tx)
+		assert.NoError(err)
+
+		result := waitForTransactionSealed(tx, assert)
+		assert.NoError(result.Error)
+		assert.Equal(1, len(result.Events))
+		assert.Equal("A.f8d6e0586b0a20c7.ForTest.Simple2", result.Events[0].Value.Type().ID())
+
+		dist := simpleStruct{}
+		err = toGoStruct(result.Events[0].Value, &dist)
+		assert.EqualError(err, "cannot find field named none in cadence struct/event")
+	})
+
+	t.Run("a simple event, with wrong type", func(t *testing.T) {
+		type simpleStruct struct {
+			MyName string `godence:"myName"`
+		}
+		assert := assert.New(t)
+		script := []byte(`
+import ForTest from 0xf8d6e0586b0a20c7
+
+transaction {
+	prepare() {
+		ForTest.emitSimple3()
+	}
+}
+		`)
+		tx := buildSimpleTx(script, assert)
+		err := flowCli.SendTransaction(context.Background(), *tx)
+		assert.NoError(err)
+
+		result := waitForTransactionSealed(tx, assert)
+		assert.NoError(result.Error)
+		assert.Equal(1, len(result.Events))
+		assert.Equal("A.f8d6e0586b0a20c7.ForTest.Simple3", result.Events[0].Value.Type().ID())
+
+		dist := simpleStruct{}
+		err = toGoStruct(result.Events[0].Value, &dist)
+		assert.EqualError(err, "structToGoStruct, panic recoverd: reflect.Set: value of type uint8 is not assignable to type string")
+	})
+
+	t.Run("a event contains many type", func(t *testing.T) {
+		assert := assert.New(t)
+		script := []byte(`
+import ForTest from 0xf8d6e0586b0a20c7
+
+transaction {
+	prepare() {
+		ForTest.emitManyType()
+	}
+}
+		`)
+		tx := buildSimpleTx(script, assert)
+		err := flowCli.SendTransaction(context.Background(), *tx)
+		assert.NoError(err)
+
+		result := waitForTransactionSealed(tx, assert)
+		assert.NoError(result.Error)
+		assert.Equal(1, len(result.Events))
+		assert.Equal("A.f8d6e0586b0a20c7.ForTest.ManyType", result.Events[0].Value.Type().ID())
+
+		dist := structContainsManyType{}
+		err = toGoStruct(result.Events[0].Value, &dist)
+		assert.NoError(err)
+		assert.Equal(big.NewInt(127), dist.IntValue)
+		assert.Equal(int8(127), dist.Int8Value)
+		assert.Equal(int16(127), dist.Int16Value)
+		assert.Equal(int32(127), dist.Int32Value)
+		assert.Equal(int64(127), dist.Int64Value)
+		assert.Equal(big.NewInt(127), dist.Int128Value)
+		assert.Equal(big.NewInt(127), dist.Int256Value)
+		assert.Equal(big.NewInt(127), dist.UIntValue)
+		assert.Equal(uint8(127), dist.UInt8Value)
+		assert.Equal(uint16(127), dist.UInt16Value)
+		assert.Equal(uint32(127), dist.UInt32Value)
+		assert.Equal(uint64(127), dist.UInt64Value)
+		assert.Equal(big.NewInt(127), dist.UInt128Value)
+		assert.Equal(big.NewInt(127), dist.UInt256Value)
+		assert.Equal("LemonNeko", dist.StringValue)
+		assert.True(dist.BoolValue)
+	})
+
+	t.Run("embedded struct", func(t *testing.T) {
+		type structInParam struct {
+			P *struct {
+				MyName string `godence:"myName"`
+			} `godence:"p"`
+		}
+		assert := assert.New(t)
+		script := []byte(`
+		import ForTest from 0xf8d6e0586b0a20c7
+
+		transaction {
+			prepare() {
+				ForTest.emitStructInParam()
+			}
+		}`)
+
+		tx := buildSimpleTx(script, assert)
+		err := flowCli.SendTransaction(context.Background(), *tx)
+		assert.NoError(err)
+
+		result := waitForTransactionSealed(tx, assert)
+		assert.NoError(result.Error)
+		assert.Equal(1, len(result.Events))
+		assert.Equal("A.f8d6e0586b0a20c7.ForTest.StructInParam", result.Events[0].Value.Type().ID())
+
+		dist := structInParam{}
+		err = toGoStruct(result.Events[0].Value, &dist)
+		assert.NoError(err)
+		assert.Equal("LemonNeko", dist.P.MyName)
 	})
 }

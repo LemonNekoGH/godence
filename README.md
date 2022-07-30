@@ -1,4 +1,6 @@
 # Godence
+[![codecov](https://codecov.io/gh/LemonNekoGH/godence/branch/main/graph/badge.svg?token=KT1RNHTIQZ)](https://codecov.io/gh/LemonNekoGH/godence)
+![Unit Test](https://github.com/LemonNekoGH/godence/actions/workflows/main_unittest.yaml/badge.svg)
 
 ## Testing
 ### Requirements
@@ -64,8 +66,8 @@
 - [x] Cadence `Address` to Go `string` or `cadence.Address` or `[8]uint8`
 - [x] Cadence `Bool` to Go `bool`
 - [ ] Cadence `Array` to Go `?`
-- [ ] Cadence `Struct` to Go `?`
+- [x] Cadence `Struct` to Go `struct`
 - [ ] Cadence `Character` to Go `?`
 - [ ] Cadence `Resource` to Go `?`
 - [ ] Cadence `Dictionary` to Go `?`
-- [ ] Cadence `Event` to Go `?`
+- [x] Cadence `Event` to Go `struct`

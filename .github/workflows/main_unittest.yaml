@@ -28,6 +28,11 @@ jobs:
         image: gcr.io/flow-container-registry/emulator
         ports:
           - 3569:3569
+        env:
+          # set private key
+          FLOW_SERVICEPRIVATEKEY: c47db93881bc34a6155192c2bec0d124731e08ff105672afdb09892e3dc9ccae
+          # print more log
+          FLOW_VERBOSE: true
     steps:
       # checkout code
       - uses: actions/checkout@v3

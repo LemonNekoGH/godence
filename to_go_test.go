@@ -3,6 +3,7 @@ package godence
 import (
 	"context"
 	"math/big"
+	"reflect"
 	"testing"
 
 	"github.com/onflow/cadence"
@@ -757,5 +758,32 @@ transaction {
 		err = toGoStruct(result.Events[0].Value, &dist)
 		assert.NoError(err)
 		assert.Equal("LemonNeko", dist.P.MyName)
+	})
+
+	// try to convert dictionary
+	t.Run("a string string dictionary", func(t *testing.T) {
+		assert := assert.New(t)
+		defer func() {
+			err := recover()
+			assert.Nil(err)
+		}()
+
+		script := []byte(`
+pub fun main(): {String: String} {
+	return {
+		"MyName": "LemonNeko"
+	}
+}`)
+		ret, err := flowCli.ExecuteScriptAtLatestBlock(context.Background(), script, nil)
+		assert.NoError(err)
+
+		dist := map[string]string{}
+		distV := reflect.ValueOf(dist)
+
+		retDic := ret.(cadence.Dictionary).Pairs
+		for _, retEntry := range retDic {
+			distV.SetMapIndex(reflect.ValueOf(retEntry.Key.ToGoValue()), reflect.ValueOf(retEntry.Value.ToGoValue()))
+		}
+		assert.Equal("LemonNeko", dist["MyName"])
 	})
 }

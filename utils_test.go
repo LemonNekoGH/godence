@@ -2,12 +2,41 @@ package godence
 
 import (
 	"context"
+	"fmt"
+	"testing"
 	"time"
 
 	"github.com/onflow/flow-go-sdk"
+	flowGrpc "github.com/onflow/flow-go-sdk/access/grpc"
 	"github.com/onflow/flow-go-sdk/crypto"
 	"github.com/stretchr/testify/assert"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
+
+var flowCli *flowGrpc.Client
+
+func initFlowClient() {
+	client, err := flowGrpc.NewClient(
+		"localhost:3569",
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
+	if err != nil {
+		panic(err)
+	}
+	err = client.Ping(context.Background())
+	if err != nil {
+		panic(err)
+	}
+	flowCli = client
+	fmt.Println("Flow client init success.")
+}
+
+func TestMain(m *testing.M) {
+	// start: Init a flow client.
+	initFlowClient()
+	m.Run()
+}
 
 // waitForTransactionSealed. Only for test
 func waitForTransactionSealed(tx *flow.Transaction, a *assert.Assertions) *flow.TransactionResult {

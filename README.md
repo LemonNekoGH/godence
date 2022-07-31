@@ -2,6 +2,35 @@
 [![codecov](https://codecov.io/gh/LemonNekoGH/godence/branch/main/graph/badge.svg?token=KT1RNHTIQZ)](https://codecov.io/gh/LemonNekoGH/godence)
 ![Unit Test](https://github.com/LemonNekoGH/godence/actions/workflows/main_unittest.yaml/badge.svg)
 
+## Get Started
+install by go get.
+```
+go get github.com/LemonNekoGH/godence
+```
+### Convert Cadence value to Go value
+If you have the following Cadence struct.
+```cadence
+pub struct Person {
+    pub var age: UInt8
+    pub var Name: String
+}
+```
+```go
+import github.com/LemonNekoGH/godence
+
+type Person struct {
+    Age uint8 `godence:"age"` // you can specify field name in cadence by tag.
+    Name string
+}
+
+func main() {
+    dist := &Person{}
+    // Omit: You got a Cadence value from a script or transaction. And return value named 'ret'.
+    godence.ToGo(ret, dist)
+}
+```
+### Convert Go value to Cadence value
+Only support for base types now.
 ## Testing
 ### Requirements
 - [Flow CLI](https://docs.onflow.org/flow-cli/): Use to emulate flow network.
@@ -65,9 +94,9 @@
 - [ ] Cadence `Path` to Go `?`
 - [x] Cadence `Address` to Go `string` or `cadence.Address` or `[8]uint8`
 - [x] Cadence `Bool` to Go `bool`
-- [ ] Cadence `Array` to Go `?`
+- [x] Cadence `Array` to Go `slice`
 - [x] Cadence `Struct` to Go `struct`
 - [ ] Cadence `Character` to Go `?`
 - [ ] Cadence `Resource` to Go `?`
-- [ ] Cadence `Dictionary` to Go `?`
+- [x] Cadence `Dictionary` to Go `map`
 - [x] Cadence `Event` to Go `struct`

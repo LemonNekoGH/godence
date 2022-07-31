@@ -96,11 +96,11 @@ func toGoMap(value cadence.Value, dist any) (err error) {
 	return
 }
 
-// toGoArray. call this function if type of dist is array kind.
-func toGoArray(value cadence.Value, dist any) (err error) {
+// toGoSlice. call this function if type of dist is array kind.
+func toGoSlice(value cadence.Value, dist any) (err error) {
 	defer func() {
 		if e := recover(); e != nil {
-			err = fmt.Errorf("toGoArray, panic recoverd: %v", e)
+			err = fmt.Errorf("toGoSlice, panic recoverd: %v", e)
 		}
 	}()
 	dic := value.(cadence.Array)
@@ -191,7 +191,7 @@ func ToGo(value cadence.Value, dist any) (err error) {
 		case reflect.Struct:
 			return toGoStruct(value, dist)
 		case reflect.Slice:
-			return toGoArray(value, dist)
+			return toGoSlice(value, dist)
 		}
 	case reflect.Map:
 		return toGoMap(value, dist)

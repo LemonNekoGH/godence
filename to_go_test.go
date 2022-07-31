@@ -923,7 +923,7 @@ pub fun main(): String {
 	})
 }
 
-func TestToGoArray(t *testing.T) {
+func TestToGoSlice(t *testing.T) {
 	t.Run("a string slice", func(t *testing.T) {
 		assert := assert.New(t)
 		script := []byte(`
@@ -934,7 +934,7 @@ pub fun main(): [String] {
 		assert.NoError(err)
 
 		dist := []string{}
-		err = toGoArray(ret, &dist)
+		err = toGoSlice(ret, &dist)
 		assert.NoError(err)
 		assert.Equal([]string{"MyName", "LemonNeko"}, dist)
 	})
@@ -949,7 +949,7 @@ pub fun main(): [Int64] {
 		assert.NoError(err)
 
 		dist := []int64{}
-		err = toGoArray(ret, &dist)
+		err = toGoSlice(ret, &dist)
 		assert.NoError(err)
 		assert.Equal([]int64{88, 64}, dist)
 	})
@@ -964,11 +964,11 @@ pub fun main(): [String] {
 		assert.NoError(err)
 
 		dist := []uint64{}
-		err = toGoArray(ret, &dist)
-		assert.EqualError(err, "toGoArray, panic recoverd: reflect.Set: value of type string is not assignable to type uint64")
+		err = toGoSlice(ret, &dist)
+		assert.EqualError(err, "toGoSlice, panic recoverd: reflect.Set: value of type string is not assignable to type uint64")
 	})
 
-	t.Run("not a array", func(t *testing.T) {
+	t.Run("not a slice", func(t *testing.T) {
 		assert := assert.New(t)
 
 		script := []byte(`
@@ -979,7 +979,7 @@ pub fun main(): String {
 		assert.NoError(err)
 
 		dist := []string{}
-		err = toGoArray(ret, &dist)
-		assert.EqualError(err, "toGoArray, panic recoverd: interface conversion: cadence.Value is cadence.String, not cadence.Array")
+		err = toGoSlice(ret, &dist)
+		assert.EqualError(err, "toGoSlice, panic recoverd: interface conversion: cadence.Value is cadence.String, not cadence.Array")
 	})
 }

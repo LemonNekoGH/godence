@@ -369,6 +369,21 @@ pub fun main(): {String: String} {
 		assert.NoError(err)
 		assert.Equal("LemonNeko", dist["MyName"])
 	})
+
+	t.Run("a string slice", func(t *testing.T) {
+		assert := assert.New(t)
+		script := []byte(`
+pub fun main(): [String] {
+	return ["MyName", "LemonNeko"]
+}`)
+		ret, err := flowCli.ExecuteScriptAtLatestBlock(context.Background(), script, nil)
+		assert.NoError(err)
+
+		dist := []string{}
+		err = ToGo(ret, &dist)
+		assert.NoError(err)
+		assert.Equal([]string{"MyName", "LemonNeko"}, dist)
+	})
 }
 
 // test for structToGoStruct
@@ -885,7 +900,7 @@ pub fun main(): {String: String} {
 
 		dist := map[uint64]uint64{}
 		err = toGoMap(ret, dist)
-		assert.EqualError(err, "structToGoStruct, panic recoverd: reflect.Value.SetMapIndex: value of type string is not assignable to type uint64")
+		assert.EqualError(err, "toGoMap, panic recoverd: reflect.Value.SetMapIndex: value of type string is not assignable to type uint64")
 	})
 
 	t.Run("not a dictionary", func(t *testing.T) {
@@ -904,6 +919,67 @@ pub fun main(): String {
 
 		dist := map[string]string{}
 		err = toGoMap(ret, dist)
-		assert.EqualError(err, "structToGoStruct, panic recoverd: interface conversion: cadence.Value is cadence.String, not cadence.Dictionary")
+		assert.EqualError(err, "toGoMap, panic recoverd: interface conversion: cadence.Value is cadence.String, not cadence.Dictionary")
+	})
+}
+
+func TestToGoArray(t *testing.T) {
+	t.Run("a string slice", func(t *testing.T) {
+		assert := assert.New(t)
+		script := []byte(`
+pub fun main(): [String] {
+	return ["MyName", "LemonNeko"]
+}`)
+		ret, err := flowCli.ExecuteScriptAtLatestBlock(context.Background(), script, nil)
+		assert.NoError(err)
+
+		dist := []string{}
+		err = toGoArray(ret, &dist)
+		assert.NoError(err)
+		assert.Equal([]string{"MyName", "LemonNeko"}, dist)
+	})
+
+	t.Run("a int64 slice", func(t *testing.T) {
+		assert := assert.New(t)
+		script := []byte(`
+pub fun main(): [Int64] {
+	return [88, 64]
+}`)
+		ret, err := flowCli.ExecuteScriptAtLatestBlock(context.Background(), script, nil)
+		assert.NoError(err)
+
+		dist := []int64{}
+		err = toGoArray(ret, &dist)
+		assert.NoError(err)
+		assert.Equal([]int64{88, 64}, dist)
+	})
+
+	t.Run("array type mismatched", func(t *testing.T) {
+		assert := assert.New(t)
+		script := []byte(`
+pub fun main(): [String] {
+	return ["MyName", "LemonNeko"]
+}`)
+		ret, err := flowCli.ExecuteScriptAtLatestBlock(context.Background(), script, nil)
+		assert.NoError(err)
+
+		dist := []uint64{}
+		err = toGoArray(ret, &dist)
+		assert.EqualError(err, "toGoArray, panic recoverd: reflect.Set: value of type string is not assignable to type uint64")
+	})
+
+	t.Run("not a array", func(t *testing.T) {
+		assert := assert.New(t)
+
+		script := []byte(`
+pub fun main(): String {
+	return "LemonNeko"
+}`)
+		ret, err := flowCli.ExecuteScriptAtLatestBlock(context.Background(), script, nil)
+		assert.NoError(err)
+
+		dist := []string{}
+		err = toGoArray(ret, &dist)
+		assert.EqualError(err, "toGoArray, panic recoverd: interface conversion: cadence.Value is cadence.String, not cadence.Array")
 	})
 }

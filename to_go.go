@@ -85,13 +85,28 @@ func structEventToGoStruct(value cadence.Value, dist any) (err error) {
 func toGoMap(value cadence.Value, dist any) (err error) {
 	defer func() {
 		if e := recover(); e != nil {
-			err = fmt.Errorf("structToGoStruct, panic recoverd: %v", e)
+			err = fmt.Errorf("toGoMap, panic recoverd: %v", e)
 		}
 	}()
 	dic := value.(cadence.Dictionary)
 	distV := reflect.ValueOf(dist)
 	for _, retEntry := range dic.Pairs {
 		distV.SetMapIndex(reflect.ValueOf(retEntry.Key.ToGoValue()), reflect.ValueOf(retEntry.Value.ToGoValue()))
+	}
+	return
+}
+
+// toGoArray. call this function if type of dist is array kind.
+func toGoArray(value cadence.Value, dist any) (err error) {
+	defer func() {
+		if e := recover(); e != nil {
+			err = fmt.Errorf("toGoArray, panic recoverd: %v", e)
+		}
+	}()
+	dic := value.(cadence.Array)
+	distV := reflect.ValueOf(dist).Elem()
+	for _, retElment := range dic.Values {
+		distV.Set(reflect.Append(distV, reflect.ValueOf(retElment.ToGoValue())))
 	}
 	return
 }
@@ -172,8 +187,11 @@ func ToGo(value cadence.Value, dist any) (err error) {
 	switch reflect.TypeOf(dist).Kind() {
 	// try to convert to struct type
 	case reflect.Pointer:
-		if reflect.TypeOf(dist).Elem().Kind() == reflect.Struct {
+		switch reflect.TypeOf(dist).Elem().Kind() {
+		case reflect.Struct:
 			return toGoStruct(value, dist)
+		case reflect.Slice:
+			return toGoArray(value, dist)
 		}
 	case reflect.Map:
 		return toGoMap(value, dist)

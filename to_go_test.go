@@ -365,7 +365,7 @@ pub fun main(): {String: String} {
 		assert.NoError(err)
 
 		dist := map[string]string{}
-		err = toGoMap(ret, dist)
+		err = ToGo(ret, dist)
 		assert.NoError(err)
 		assert.Equal("LemonNeko", dist["MyName"])
 	})

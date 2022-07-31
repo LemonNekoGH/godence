@@ -178,10 +178,5 @@ func ToGo(value cadence.Value, dist any) (err error) {
 	case reflect.Map:
 		return toGoMap(value, dist)
 	}
-
-	// check if panic recovered
-	if err != nil {
-		return err
-	}
 	return fmt.Errorf("unsupport type: %s", reflect.TypeOf(dist))
 }

@@ -335,6 +335,19 @@ func TestToGo(t *testing.T) {
 		assert.NoError(err)
 		assert.True(dist)
 	})
+	t.Run("Character convert to string", func(t *testing.T) {
+		assert := assert.New(t)
+		script := []byte(`pub fun main(): Character { return "a" }`)
+
+		ret, err := flowCli.ExecuteScriptAtLatestBlock(context.Background(), script, nil)
+		assert.NoError(err)
+		assert.Equal(ret.Type().ID(), "Character")
+
+		var dist string
+		err = ToGo(ret, &dist)
+		assert.NoError(err)
+		assert.Equal("a", dist)
+	})
 
 	t.Run("a simple struct", func(t *testing.T) {
 		type simpleStruct struct {

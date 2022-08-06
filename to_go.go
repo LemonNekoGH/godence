@@ -166,12 +166,9 @@ func ToGo(value cadence.Value, dist any) (err error) {
 		*v = value.ToGoValue().(uint64)
 		return nil
 	// other
-	case *string: // Cadence String, Address, Path
+	case *string: // Cadence String, Address, Path, Character(why?)
 		switch cv := value.(type) {
-		case cadence.Address:
-			*v = cv.String()
-			return
-		case cadence.Path:
+		case cadence.Address, cadence.Path:
 			*v = cv.String()
 			return
 		}

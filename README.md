@@ -16,7 +16,7 @@ pub struct Person {
 }
 ```
 ```go
-import github.com/LemonNekoGH/godence
+import "github.com/LemonNekoGH/godence"
 
 type Person struct {
     Age uint8 `godence:"age"` // you can specify field name in cadence by tag.
@@ -91,12 +91,12 @@ Only support for base types now.
 - [x] Cadence `UFix64` to Go `uint64`
 ### Other
 - [x] Cadence `String` to Go `string`
-- [x] Cadence `Path` to Go `?`
+- [x] Cadence `Path` to Go `string`
 - [x] Cadence `Address` to Go `string` or `cadence.Address` or `[8]uint8`
 - [x] Cadence `Bool` to Go `bool`
 - [x] Cadence `Array` to Go `slice`
 - [x] Cadence `Struct` to Go `struct`
-- [ ] Cadence `Character` to Go `?`
+- [x] Cadence `Character` to Go `string`
 - [ ] Cadence `Resource` to Go `?`
 - [x] Cadence `Dictionary` to Go `map`
 - [x] Cadence `Event` to Go `struct`

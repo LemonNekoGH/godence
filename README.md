@@ -97,6 +97,6 @@ Only support for base types now.
 - [x] Cadence `Array` to Go `slice`
 - [x] Cadence `Struct` to Go `struct`
 - [x] Cadence `Character` to Go `string`
-- [ ] Cadence `Resource` to Go `?`
+- [x] Cadence `Resource` to Go `struct`
 - [x] Cadence `Dictionary` to Go `map`
 - [x] Cadence `Event` to Go `struct`

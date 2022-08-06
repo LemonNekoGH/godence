@@ -23,19 +23,25 @@ func getFieldByName(name string, value cadence.Value) (cadence.Value, error) {
 				return v.Fields[index], nil
 			}
 		}
+	case cadence.Resource:
+		for index, field := range v.ResourceType.Fields {
+			if name == field.Identifier {
+				return v.Fields[index], nil
+			}
+		}
 	}
 	// not found, return void and error
-	return cadence.NewVoid(), fmt.Errorf("cannot find field named %s in cadence struct/event", name)
+	return cadence.NewVoid(), fmt.Errorf("cannot find field named %s in cadence struct/event/resource", name)
 }
 
-// structEventToGoStruct
-func structEventToGoStruct(value cadence.Value, dist any) (err error) {
+// structEventResourceToGoStruct
+func structEventResourceToGoStruct(value cadence.Value, dist any) (err error) {
 	distT := reflect.TypeOf(dist)
 	distV := reflect.ValueOf(dist)
 
 	defer func() {
 		if msg := recover(); msg != nil {
-			err = fmt.Errorf("structEventToGoStruct, panic recoverd: %v", msg)
+			err = fmt.Errorf("structEventResourceToGoStruct, panic recoverd: %v", msg)
 		}
 	}()
 
@@ -115,9 +121,11 @@ func toGoSlice(value cadence.Value, dist any) (err error) {
 func toGoStruct(value cadence.Value, dist any) error {
 	switch v := value.(type) {
 	case cadence.Struct:
-		return structEventToGoStruct(v, dist)
+		return structEventResourceToGoStruct(v, dist)
 	case cadence.Event:
-		return structEventToGoStruct(v, dist)
+		return structEventResourceToGoStruct(v, dist)
+	case cadence.Resource:
+		return structEventResourceToGoStruct(v, dist)
 	}
 	return fmt.Errorf("to go struct: unsupport cadence type: %s", reflect.TypeOf(value))
 }

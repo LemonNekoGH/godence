@@ -547,7 +547,7 @@ pub fun main(): SimpleStruct {
 
 		dist := simpleStruct{}
 		err = toGoStruct(ret, &dist)
-		assert.EqualError(err, "cannot find field named none in cadence struct/event")
+		assert.EqualError(err, "cannot find field named none in cadence struct/event/resource")
 	})
 
 	t.Run("a simple struct, with wrong type", func(t *testing.T) {
@@ -571,7 +571,7 @@ pub fun main(): SimpleStruct {
 
 		dist := simpleStruct{}
 		err = toGoStruct(ret, &dist)
-		assert.EqualError(err, "structEventToGoStruct, panic recoverd: reflect.Set: value of type uint8 is not assignable to type string")
+		assert.EqualError(err, "structEventResourceToGoStruct, panic recoverd: reflect.Set: value of type uint8 is not assignable to type string")
 	})
 
 	t.Run("a struct contains many type", func(t *testing.T) {
@@ -761,7 +761,7 @@ transaction {
 
 		dist := simpleStruct{}
 		err = toGoStruct(result.Events[0].Value, &dist)
-		assert.EqualError(err, "cannot find field named none in cadence struct/event")
+		assert.EqualError(err, "cannot find field named none in cadence struct/event/resource")
 	})
 
 	t.Run("a simple event, with wrong type", func(t *testing.T) {
@@ -789,7 +789,7 @@ transaction {
 
 		dist := simpleStruct{}
 		err = toGoStruct(result.Events[0].Value, &dist)
-		assert.EqualError(err, "structEventToGoStruct, panic recoverd: reflect.Set: value of type uint8 is not assignable to type string")
+		assert.EqualError(err, "structEventResourceToGoStruct, panic recoverd: reflect.Set: value of type uint8 is not assignable to type string")
 	})
 
 	t.Run("a event contains many type", func(t *testing.T) {
@@ -860,6 +860,141 @@ transaction {
 
 		dist := structInParam{}
 		err = toGoStruct(result.Events[0].Value, &dist)
+		assert.NoError(err)
+		assert.Equal("LemonNeko", dist.P.MyName)
+	})
+
+	t.Run("a simple resource", func(t *testing.T) {
+		type simpleStruct struct {
+			MyName string
+		}
+		assert := assert.New(t)
+		script := []byte(`
+import ForTest from 0xf8d6e0586b0a20c7
+
+pub fun main(): &ForTest.SimpleR {
+	return getAccount(0xf8d6e0586b0a20c7).getCapability<&ForTest.SimpleR>(/public/simpleR).borrow()!
+}`)
+		ret, err := flowCli.ExecuteScriptAtLatestBlock(context.Background(), script, nil)
+		assert.NoError(err)
+
+		dist := simpleStruct{}
+		err = toGoStruct(ret, &dist)
+		assert.NoError(err)
+		assert.Equal("LemonNeko", dist.MyName)
+	})
+
+	t.Run("a simple resource with name tag", func(t *testing.T) {
+		type simpleStruct struct {
+			MyName string `godence:"myName"`
+		}
+		assert := assert.New(t)
+		script := []byte(`
+import ForTest from 0xf8d6e0586b0a20c7
+
+pub fun main(): &ForTest.SimpleR2 {
+	return getAccount(0xf8d6e0586b0a20c7).getCapability<&ForTest.SimpleR2>(/public/simpleR2).borrow()!
+}`)
+		ret, err := flowCli.ExecuteScriptAtLatestBlock(context.Background(), script, nil)
+		assert.NoError(err)
+
+		dist := simpleStruct{}
+		err = toGoStruct(ret, &dist)
+		assert.NoError(err)
+		assert.Equal("LemonNeko", dist.MyName)
+	})
+
+	t.Run("a simple resource with wrong name tag", func(t *testing.T) {
+		type simpleStruct struct {
+			MyName string `godence:"none"`
+		}
+		assert := assert.New(t)
+		script := []byte(`
+import ForTest from 0xf8d6e0586b0a20c7
+
+pub fun main(): &ForTest.SimpleR2 {
+	return getAccount(0xf8d6e0586b0a20c7).getCapability<&ForTest.SimpleR2>(/public/simpleR2).borrow()!
+}`)
+		ret, err := flowCli.ExecuteScriptAtLatestBlock(context.Background(), script, nil)
+		assert.NoError(err)
+
+		dist := simpleStruct{}
+		err = toGoStruct(ret, &dist)
+		assert.EqualError(err, "cannot find field named none in cadence struct/event/resource")
+	})
+
+	t.Run("a resource contains many type", func(t *testing.T) {
+		assert := assert.New(t)
+		script := []byte(`
+import ForTest from 0xf8d6e0586b0a20c7
+
+pub fun main(): &ForTest.ResourceContainsManyType {
+	return getAccount(0xf8d6e0586b0a20c7).getCapability<&ForTest.ResourceContainsManyType>(/public/rMany).borrow()!
+}`)
+		ret, err := flowCli.ExecuteScriptAtLatestBlock(context.Background(), script, nil)
+		assert.NoError(err)
+
+		dist := structContainsManyType{}
+		err = toGoStruct(ret, &dist)
+		assert.NoError(err)
+		assert.Equal(big.NewInt(127), dist.IntValue)
+		assert.Equal(int8(127), dist.Int8Value)
+		assert.Equal(int16(127), dist.Int16Value)
+		assert.Equal(int32(127), dist.Int32Value)
+		assert.Equal(int64(127), dist.Int64Value)
+		assert.Equal(big.NewInt(127), dist.Int128Value)
+		assert.Equal(big.NewInt(127), dist.Int256Value)
+		assert.Equal(big.NewInt(127), dist.UIntValue)
+		assert.Equal(uint8(127), dist.UInt8Value)
+		assert.Equal(uint16(127), dist.UInt16Value)
+		assert.Equal(uint32(127), dist.UInt32Value)
+		assert.Equal(uint64(127), dist.UInt64Value)
+		assert.Equal(big.NewInt(127), dist.UInt128Value)
+		assert.Equal(big.NewInt(127), dist.UInt256Value)
+		assert.Equal("LemonNeko", dist.StringValue)
+		assert.True(dist.BoolValue)
+	})
+
+	t.Run("a struct embedded resource", func(t *testing.T) {
+		type structInParam struct {
+			P *struct {
+				MyName string `godence:"myName"`
+			} `godence:"forEmbedded"`
+		}
+		assert := assert.New(t)
+		script := []byte(`
+import ForTest from 0xf8d6e0586b0a20c7
+
+pub fun main(): &ForTest.AStructEmbeddedInAResource {
+	return getAccount(0xf8d6e0586b0a20c7).getCapability<&ForTest.AStructEmbeddedInAResource>(/public/embeddedStruct).borrow()!
+}`)
+		ret, err := flowCli.ExecuteScriptAtLatestBlock(context.Background(), script, nil)
+		assert.NoError(err)
+
+		dist := structInParam{}
+		err = toGoStruct(ret, &dist)
+		assert.NoError(err)
+		assert.Equal("LemonNeko", dist.P.MyName)
+	})
+
+	t.Run("a resource embedded resource", func(t *testing.T) {
+		type structInParam struct {
+			P *struct {
+				MyName string `godence:"myName"`
+			} `godence:"forEmbedded"`
+		}
+		assert := assert.New(t)
+		script := []byte(`
+import ForTest from 0xf8d6e0586b0a20c7
+
+pub fun main(): &ForTest.AResourceEmbeddedInAResource {
+	return getAccount(0xf8d6e0586b0a20c7).getCapability<&ForTest.AResourceEmbeddedInAResource>(/public/embeddedResource).borrow()!
+}`)
+		ret, err := flowCli.ExecuteScriptAtLatestBlock(context.Background(), script, nil)
+		assert.NoError(err)
+
+		dist := structInParam{}
+		err = toGoStruct(ret, &dist)
 		assert.NoError(err)
 		assert.Equal("LemonNeko", dist.P.MyName)
 	})

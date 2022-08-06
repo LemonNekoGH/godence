@@ -30,7 +30,8 @@ func main() {
 }
 ```
 ### Convert Go value to Cadence value
-Only support for base types now.
+Convert to Cadecne Struct, Event, Resource is currently not support becase type name of Struct, Event, Resource is unpredictable.  
+Can i convert to AnyStruct and AnyResource?
 ## Testing
 ### Requirements
 - [Flow CLI](https://docs.onflow.org/flow-cli/): Use to emulate flow network.
@@ -40,6 +41,7 @@ Only support for base types now.
 2. Open another terminal and run `go clean -testcache && go test .`
 
 ## TODO-List: Go to Cadence
+- [ ] Documents for Go to Cadence
 ### Integers
 - [x] Go `int` to Cadence `Int`
 - [x] Go `int8` to Cadence `Int8`
@@ -60,17 +62,19 @@ Only support for base types now.
 - [x] Go `uint64` to Cadence `UFix64`
 ### Other
 - [x] Go `string` to Cadence `String`
-- [ ] Go `?` to Cadence `Path`
-- [ ] Go `?` to Cadence `Address`
+- [x] Go `string` to Cadence `Path`
+- [x] Go `string` to Cadence `Address`
 - [x] Go `bool` to Cadence `Bool`
-- [ ] Go `?` to Cadence `Array`
-- [ ] Go `?` to Cadence `Struct`
-- [ ] Go `?` to Cadence `Character`
-- [ ] Go `?` to Cadence `Resource`
+- [ ] Go `?` to Cadence `Array`  
+- [ ] ~~Go `?` to Cadence `Struct`~~
+- [x] Go `string` to Cadence `Character`
+- [ ] ~~Go `?` to Cadence `Resource`~~
 - [ ] Go `?` to Cadence `Dictionary`
-- [ ] Go `?` to Cadence `Event`
+- [ ] ~~Go `?` to Cadence `Event`~~
 
 ## TODO-List: Cadence to go
+- [ ] Documents for Cadence base type to Go.
+- [ ] Documents for Cadence complex type to Go.
 ### Integers
 - [x] Cadence `Int` to Go `*big.Int`
 - [x] Cadence `Int8` to Go `int8`

@@ -1,9 +1,11 @@
 package godence
 
 import (
+	"encoding/hex"
 	"fmt"
 	"math/big"
 	"reflect"
+	"strings"
 
 	"github.com/onflow/cadence"
 )
@@ -16,6 +18,15 @@ type UFix64 uint64
 
 // helper for fix64
 type Fix64 int64
+
+// helper for Address
+type Address string
+
+// helper for Address
+type Path string
+
+// helper for Character
+type Character string
 
 // bigIntToCadence
 func bigIntToCadence(i *big.Int) (cadence.Value, error) {
@@ -38,40 +49,6 @@ func bigIntToCadence(i *big.Int) (cadence.Value, error) {
 	}
 	return nil, fmt.Errorf("unsupport big.Int value: %s", i.Text(10))
 }
-
-// structToCadence
-// func structToCadence(value any) (cadence.Value, error) {
-// 	reflectV := reflect.ValueOf(value)
-// 	fields := []cadence.Value{}
-
-// 	// convert fields to cadence
-// 	for index := 0; index < reflectV.NumField(); index++ {
-// 		cadenceValue, err := ToCadence(reflectV.Field(index).Interface())
-// 		if err != nil {
-// 			return nil, err
-// 		}
-// 		fields = append(fields, cadenceValue)
-// 	}
-
-// 	// add field names to struct type
-// 	nameFields := []cadence.Field{}
-// 	reflectT := reflect.TypeOf(value)
-// 	for index, v := range fields {
-// 		nameFields = append(nameFields, cadence.NewField(reflectT.Field(index).Name, v.Type()))
-// 	}
-
-// 	// add type to struct
-// 	t := &cadence.StructType{
-// 		QualifiedIdentifier: reflectT.Name(), // TODO: Why Invalid?
-// 		Fields:              nameFields,
-// 	}
-// 	// new a cadence struct
-// 	ret := cadence.Struct{
-// 		StructType: t,
-// 		Fields:     fields,
-// 	}
-// 	return ret, nil
-// }
 
 // ToCadence Convert any go value to cadence value.
 // Type uint64 will convert to UInt64, if you want to convert to UFix64,
@@ -110,13 +87,17 @@ func ToCadence(value any) (cadence.Value, error) {
 	// case float64:
 	case string:
 		return cadence.NewString(v)
+	case Address:
+		decoded, err := hex.DecodeString(strings.TrimPrefix(string(v), "0x"))
+		return cadence.BytesToAddress(decoded), err
+	case Path:
+		part := strings.Split(string(v), "/")
+		return cadence.NewPath(part[1], part[2]), nil
+	case Character:
+		return cadence.NewCharacter(string(v))
 	case bool:
 		return cadence.NewBool(v), nil
 	}
-	// TODO: how to convert struct?
-	// if reflect.TypeOf(value).Kind() == reflect.Struct {
-	// 	return processStruct(value)
-	// }
 	return nil, fmt.Errorf("unsupport type: %s", reflect.TypeOf(value))
 }
 

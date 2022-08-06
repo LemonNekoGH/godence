@@ -273,38 +273,45 @@ func TestToCadence(t *testing.T) {
 		assert.NoError(err)
 		assert.Equal(ret.Type().ID(), "Void")
 	})
+	t.Run("to Address", func(t *testing.T) {
+		assert := assert.New(t)
+		script := []byte(`pub fun main(arg: Address) { log("the arg is ".concat(arg.toString())) }`)
 
-	// ==========
-	// Structs
-	// ==========
-	// TODO:
-	// 	t.Run("a simple struct", func(t *testing.T) {
-	// 		assert := assert.New(t)
-	// 		script := []byte(`
-	// pub struct SimpleStruct {
-	// 	pub var A: Int
+		cadenceValue, err := ToCadence(Address("0x01234567"))
+		assert.NoError(err)
+		assert.Equal(cadenceValue.Type().ID(), "Address")
 
-	// 	init() {
-	// 		self.A = 0
-	// 	}
-	// }
+		args := []cadence.Value{cadenceValue}
+		ret, err := flowCli.ExecuteScriptAtLatestBlock(context.Background(), script, args)
+		assert.NoError(err)
+		assert.Equal(ret.Type().ID(), "Void")
+	})
+	t.Run("to Path", func(t *testing.T) {
+		assert := assert.New(t)
+		script := []byte(`pub fun main(arg: Path) { log("the arg is ".concat(arg.toString())) }`)
 
-	// pub fun main(arg: SimpleStruct) {
-	// 	log("the arg is ".concat(arg.A.toString()))
-	// }`)
+		cadenceValue, err := ToCadence(Path("/public/myCollection"))
+		assert.NoError(err)
+		assert.Equal(cadenceValue.Type().ID(), "Path")
 
-	// 		type SimpleStruct struct {
-	// 			A int
-	// 		}
+		args := []cadence.Value{cadenceValue}
+		ret, err := flowCli.ExecuteScriptAtLatestBlock(context.Background(), script, args)
+		assert.NoError(err)
+		assert.Equal(ret.Type().ID(), "Void")
+	})
+	t.Run("to Character", func(t *testing.T) {
+		assert := assert.New(t)
+		script := []byte(`pub fun main(arg: Character) { log("the arg is ".concat(arg.toString())) }`)
 
-	// 		cadenceValue, err := ToCadence(SimpleStruct{A: 15})
-	// 		assert.NoError(err)
+		cadenceValue, err := ToCadence(Character("a"))
+		assert.NoError(err)
+		assert.Equal(cadenceValue.Type().ID(), "Character")
 
-	// 		args := []cadence.Value{cadenceValue}
-	// 		ret, err := flowCli.ExecuteScriptAtLatestBlock(context.Background(), script, args)
-	// 		assert.NoError(err)
-	// 		assert.Equal(ret.Type().ID(), "Void")
-	// 	})
+		args := []cadence.Value{cadenceValue}
+		ret, err := flowCli.ExecuteScriptAtLatestBlock(context.Background(), script, args)
+		assert.NoError(err)
+		assert.Equal(ret.Type().ID(), "Void")
+	})
 }
 
 func TestToCadenceOptional(t *testing.T) {

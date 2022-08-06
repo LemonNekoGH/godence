@@ -91,7 +91,7 @@ Only support for base types now.
 - [x] Cadence `UFix64` to Go `uint64`
 ### Other
 - [x] Cadence `String` to Go `string`
-- [ ] Cadence `Path` to Go `?`
+- [x] Cadence `Path` to Go `?`
 - [x] Cadence `Address` to Go `string` or `cadence.Address` or `[8]uint8`
 - [x] Cadence `Bool` to Go `bool`
 - [x] Cadence `Array` to Go `slice`

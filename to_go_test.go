@@ -283,6 +283,19 @@ func TestToGo(t *testing.T) {
 		assert.NoError(err)
 		assert.Equal("0x0000000000000000", dist)
 	})
+	t.Run("Path covert to string", func(t *testing.T) {
+		assert := assert.New(t)
+		script := []byte(`pub fun main(): Path { return /public/collectionStoragePath }`)
+
+		ret, err := flowCli.ExecuteScriptAtLatestBlock(context.Background(), script, nil)
+		assert.NoError(err)
+		assert.Equal(ret.Type().ID(), "Path")
+
+		var dist string
+		err = ToGo(ret, &dist)
+		assert.NoError(err)
+		assert.Equal("/public/collectionStoragePath", dist)
+	})
 	t.Run("Address convert to [8]uint8", func(t *testing.T) {
 		assert := assert.New(t)
 		script := []byte(`pub fun main(): Address { return 0x0 }`)

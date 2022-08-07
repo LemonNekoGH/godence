@@ -10,9 +10,6 @@ import (
 	"github.com/onflow/cadence"
 )
 
-// 不受支持的类型
-type UnsupportType string
-
 // helper for ufix64
 type UFix64 uint64
 
@@ -48,6 +45,43 @@ func bigIntToCadence(i *big.Int) (cadence.Value, error) {
 		return u256, nil
 	}
 	return nil, fmt.Errorf("unsupport big.Int value: %s", i.Text(10))
+}
+
+// arrayOrSliceToCadence
+func arrayOrSliceToCadence(value any) (cadence.Value, error) {
+	ret := []cadence.Value{}
+	v := reflect.ValueOf(value)
+	for i := 0; i < v.Len(); i++ {
+		// convert all elements of slice/array
+		cv, err := ToCadence(v.Index(i).Interface())
+		if err != nil {
+			return nil, err
+		}
+		ret = append(ret, cv)
+	}
+	return cadence.NewArray(ret), nil
+}
+
+// mapToCadence
+func mapToCadence(value any) (cadence.Value, error) {
+	ret := []cadence.KeyValuePair{}
+	v := reflect.ValueOf(value)
+	// convert all entry to KeyValuePair
+	for _, key := range v.MapKeys() {
+		ck, err := ToCadence(key.Interface())
+		if err != nil {
+			return nil, err
+		}
+		cv, err := ToCadence(v.MapIndex(key).Interface())
+		if err != nil {
+			return nil, err
+		}
+		ret = append(ret, cadence.KeyValuePair{
+			Key:   ck,
+			Value: cv,
+		})
+	}
+	return cadence.NewDictionary(ret), nil
 }
 
 // ToCadence Convert any go value to cadence value.
@@ -97,6 +131,14 @@ func ToCadence(value any) (cadence.Value, error) {
 		return cadence.NewCharacter(string(v))
 	case bool:
 		return cadence.NewBool(v), nil
+	}
+	switch reflect.TypeOf(value).Kind() {
+	// array or slice
+	case reflect.Slice, reflect.Array:
+		return arrayOrSliceToCadence(value)
+	// map
+	case reflect.Map:
+		return mapToCadence(value)
 	}
 	return nil, fmt.Errorf("unsupport type: %s", reflect.TypeOf(value))
 }

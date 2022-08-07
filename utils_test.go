@@ -14,6 +14,9 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
+// Helper for unsupport type test.
+type unsupportType string
+
 var flowCli *flowGrpc.Client
 
 func initFlowClient() {

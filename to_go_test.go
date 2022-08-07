@@ -18,9 +18,9 @@ func TestToGo(t *testing.T) {
 		assert.NoError(err)
 		assert.Equal(ret.Type().ID(), "Int")
 
-		dist := UnsupportType("")
+		dist := unsupportType("")
 		err = ToGo(ret, dist)
-		assert.EqualError(err, "unsupport type: godence.UnsupportType")
+		assert.EqualError(err, "unsupport type: godence.unsupportType")
 	})
 	t.Run("type cast failed", func(t *testing.T) {
 		assert := assert.New(t)

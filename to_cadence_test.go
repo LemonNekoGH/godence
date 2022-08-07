@@ -12,9 +12,9 @@ import (
 func TestToCadence(t *testing.T) {
 	t.Run("unsupport type", func(t *testing.T) {
 		assert := assert.New(t)
-		cadenceValue, err := ToCadence(UnsupportType(""))
+		cadenceValue, err := ToCadence(unsupportType(""))
 		assert.Nil(cadenceValue)
-		assert.EqualError(err, "unsupport type: godence.UnsupportType")
+		assert.EqualError(err, "unsupport type: godence.unsupportType")
 	})
 	t.Run("to int", func(t *testing.T) {
 		assert := assert.New(t)
@@ -312,6 +312,72 @@ func TestToCadence(t *testing.T) {
 		assert.NoError(err)
 		assert.Equal(ret.Type().ID(), "Void")
 	})
+
+	t.Run("slice to Array", func(t *testing.T) {
+		assert := assert.New(t)
+		script := []byte(`pub fun main(arg: [String]): Bool { return arg[0] == "My" && arg[1] == "Name" && arg[2] == "Is" && arg[3] == "LemonNeko" }`)
+
+		cadenceValue, err := ToCadence([]string{"My", "Name", "Is", "LemonNeko"})
+		assert.NoError(err)
+
+		args := []cadence.Value{cadenceValue}
+		ret, err := flowCli.ExecuteScriptAtLatestBlock(context.Background(), script, args)
+		assert.NoError(err)
+		assert.Equal(ret.Type().ID(), "Bool")
+		assert.True(ret.ToGoValue().(bool))
+	})
+
+	t.Run("array to Array", func(t *testing.T) {
+		assert := assert.New(t)
+		script := []byte(`pub fun main(arg: [String]): Bool { return arg[0] == "My" && arg[1] == "Name" && arg[2] == "Is" && arg[3] == "LemonNeko" }`)
+
+		cadenceValue, err := ToCadence([...]string{"My", "Name", "Is", "LemonNeko"})
+		assert.NoError(err)
+
+		args := []cadence.Value{cadenceValue}
+		ret, err := flowCli.ExecuteScriptAtLatestBlock(context.Background(), script, args)
+		assert.NoError(err)
+		assert.Equal(ret.Type().ID(), "Bool")
+		assert.True(ret.ToGoValue().(bool))
+	})
+
+	t.Run("unsupport to Array", func(t *testing.T) {
+		assert := assert.New(t)
+
+		cadenceValue, err := ToCadence([...]unsupportType{"My", "Name", "Is", "LemonNeko"})
+		assert.EqualError(err, "unsupport type: godence.unsupportType")
+		assert.Nil(cadenceValue)
+	})
+
+	t.Run("map to Dictionary", func(t *testing.T) {
+		assert := assert.New(t)
+		script := []byte(`pub fun main(arg: {String: String}): Bool { return arg["MyName"] == "LemonNeko" }`)
+
+		cadenceValue, err := ToCadence(map[string]string{"MyName": "LemonNeko"})
+		assert.NoError(err)
+
+		args := []cadence.Value{cadenceValue}
+		ret, err := flowCli.ExecuteScriptAtLatestBlock(context.Background(), script, args)
+		assert.NoError(err)
+		assert.Equal(ret.Type().ID(), "Bool")
+		assert.True(ret.ToGoValue().(bool))
+	})
+
+	t.Run("map to Dictionary, unsupport key type", func(t *testing.T) {
+		assert := assert.New(t)
+
+		cadenceValue, err := ToCadence(map[unsupportType]string{"MyName": "LemonNeko"})
+		assert.EqualError(err, "unsupport type: godence.unsupportType")
+		assert.Nil(cadenceValue)
+	})
+
+	t.Run("map to Dictionary, unsupport value type", func(t *testing.T) {
+		assert := assert.New(t)
+
+		cadenceValue, err := ToCadence(map[string]unsupportType{"MyName": "LemonNeko"})
+		assert.EqualError(err, "unsupport type: godence.unsupportType")
+		assert.Nil(cadenceValue)
+	})
 }
 
 func TestToCadenceOptional(t *testing.T) {
@@ -591,8 +657,8 @@ func TestToCadenceOptional(t *testing.T) {
 	t.Run("error", func(t *testing.T) {
 		assert := assert.New(t)
 
-		_, err := ToCadenceOptional(UnsupportType(""))
-		assert.EqualError(err, "unsupport type: godence.UnsupportType")
+		_, err := ToCadenceOptional(unsupportType(""))
+		assert.EqualError(err, "unsupport type: godence.unsupportType")
 	})
 }
 

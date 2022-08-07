@@ -65,11 +65,11 @@ Can i convert to AnyStruct and AnyResource?
 - [x] Go `string` to Cadence `Path`
 - [x] Go `string` to Cadence `Address`
 - [x] Go `bool` to Cadence `Bool`
-- [ ] Go `?` to Cadence `Array`  
+- [x] Go `slice` or `array` to Cadence `Array`  
 - [ ] ~~Go `?` to Cadence `Struct`~~
 - [x] Go `string` to Cadence `Character`
 - [ ] ~~Go `?` to Cadence `Resource`~~
-- [ ] Go `?` to Cadence `Dictionary`
+- [x] Go `?` to Cadence `Dictionary`
 - [ ] ~~Go `?` to Cadence `Event`~~
 
 ## TODO-List: Cadence to go

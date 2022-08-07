@@ -1,6 +1,8 @@
 # Godence
 [![codecov](https://codecov.io/gh/LemonNekoGH/godence/branch/main/graph/badge.svg?token=KT1RNHTIQZ)](https://codecov.io/gh/LemonNekoGH/godence)
 ![Unit Test](https://github.com/LemonNekoGH/godence/actions/workflows/main_unittest.yaml/badge.svg)
+[![Go Reference](https://pkg.go.dev/badge/github.com/LemonNekoGH/godence.svg)](https://pkg.go.dev/github.com/LemonNekoGH/godence)
+![GitHub top language](https://img.shields.io/github/languages/top/LemonNekoGH/godence)
 
 ## Get Started
 install by go get.

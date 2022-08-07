@@ -1,0 +1,59 @@
+name: Unit Test On PR
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  unittest:
+    runs-on: ubuntu-latest
+    services:
+      # Set up flow emulator
+      flow-emulator:
+        image: gcr.io/flow-container-registry/emulator
+        ports:
+          - 3569:3569
+        env:
+          # set private key
+          FLOW_SERVICEPRIVATEKEY: c47db93881bc34a6155192c2bec0d124731e08ff105672afdb09892e3dc9ccae
+          # print more log
+          FLOW_VERBOSE: true
+    steps:
+      # checkout code
+      - uses: actions/checkout@v3
+      # set up go
+      - uses: actions/setup-go@v2
+        with:
+          go-version: "^1.18.0"
+      - name: Set up flow-cli
+        run: |
+          sh -ci "$(curl -fsSL https://storage.googleapis.com/flow-cli/install.sh)"
+          flow version
+      - name: Deploy contract for test
+        run: |
+          flow deploy
+      # Scan for protential mistakes
+      - name: Vet
+        run: |
+          go vet ./...
+      - name: Unit tests
+        run: |
+          go test $(go list ./... | grep -v pkg/mongodb) -coverprofile coverage.txt -covermode atomic -p=1
+          go tool cover -func coverage.txt
+      - name: Coverage
+        env:
+          TESTCOVERAGE_THRESHOLD: 60
+        run: |
+          echo "Checking coverage..."
+          echo "Threshold             : $TESTCOVERAGE_THRESHOLD %"
+          totalCoverage=`go tool cover -func=coverage.txt | grep total | grep -Eo '[0-9]+\.[0-9]+'`
+          echo "Current test coverage : $totalCoverage %"
+          if (( $(echo "$totalCoverage $TESTCOVERAGE_THRESHOLD" | awk '{print ($1 > $2)}') )); then
+              echo "OK"
+          else
+              msg="Current test coverage is below threshold. Please add more unit tests or adjust threshold to a lower value.Failed"
+              echo -e $msg
+              exit 1
+          fi
+      # Codecov
+      - uses: codecov/codecov-action@v2

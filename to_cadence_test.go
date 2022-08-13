@@ -2,12 +2,31 @@ package godence
 
 import (
 	"context"
+	"fmt"
 	"math/big"
 	"testing"
 
 	"github.com/onflow/cadence"
 	"github.com/stretchr/testify/assert"
 )
+
+func ExampleToCadence_baseType() {
+	cadenceValue, err := ToCadence(int(15))
+	fmt.Printf("type id: %s, err: %v", cadenceValue.Type().ID(), err)
+	//Output: type id: Int, err: <nil>
+}
+
+func ExampleToCadence_bigInt() {
+	cadenceValue, err := ToCadence(big.NewInt(10))
+	fmt.Printf("type id: %s, err: %v", cadenceValue.Type().ID(), err)
+	//Output: type id: Int128, err: <nil>
+}
+
+func ExampleToCadence_uFix64() {
+	cadenceValue, err := ToCadence(UFix64(15))
+	fmt.Printf("type id: %s, err: %v", cadenceValue.Type().ID(), err)
+	//Output: type id: UFix64, err: <nil>
+}
 
 func TestToCadence(t *testing.T) {
 	t.Run("unsupport type", func(t *testing.T) {

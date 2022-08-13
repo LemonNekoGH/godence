@@ -86,7 +86,7 @@ func mapToCadence(value any) (cadence.Value, error) {
 
 // ToCadence Convert any go value to cadence value.
 // Type uint64 will convert to UInt64, if you want to convert to UFix64,
-// you should wrap the field in a struct and tagged it with `godence:"type:UFix64"`, or use our UFix64 type.
+// you should use our UFix64 type.
 func ToCadence(value any) (cadence.Value, error) {
 	switch v := value.(type) {
 	// integer

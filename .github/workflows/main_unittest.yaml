@@ -25,7 +25,7 @@ jobs:
     services:
       # Set up flow emulator
       flow-emulator:
-        image: gcr.io/flow-container-registry/emulator
+        image: gcr.io/flow-container-registry/emulator:0.34.1
         ports:
           - 3569:3569
         env:

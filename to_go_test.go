@@ -430,7 +430,7 @@ func TestToGoStruct(t *testing.T) {
 		UInt128Value *big.Int `godence:"uint128Value"`
 		UInt256Value *big.Int `godence:"uint256Value"`
 		StringValue  string   `godence:"stringValue"`
-		AddressValue [8]uint8 `godence:"addressValue"`
+		AddressValue string   `godence:"addressValue"`
 		BoolValue    bool     `godence:"boolValue"`
 	}
 
@@ -640,6 +640,7 @@ pub fun main(): StructContainsManyType {
 		assert.Equal(big.NewInt(127), dist.UInt128Value)
 		assert.Equal(big.NewInt(127), dist.UInt256Value)
 		assert.Equal("LemonNeko", dist.StringValue)
+		assert.Equal("0x0000000000000000", dist.AddressValue)
 		assert.True(dist.BoolValue)
 	})
 
@@ -830,6 +831,7 @@ transaction {
 		assert.Equal(big.NewInt(127), dist.UInt128Value)
 		assert.Equal(big.NewInt(127), dist.UInt256Value)
 		assert.Equal("LemonNeko", dist.StringValue)
+		assert.Equal("0x0000000000000000", dist.AddressValue)
 		assert.True(dist.BoolValue)
 	})
 
@@ -952,6 +954,7 @@ pub fun main(): &ForTest.ResourceContainsManyType {
 		assert.Equal(big.NewInt(127), dist.UInt128Value)
 		assert.Equal(big.NewInt(127), dist.UInt256Value)
 		assert.Equal("LemonNeko", dist.StringValue)
+		assert.Equal("0x0000000000000000", dist.AddressValue)
 		assert.True(dist.BoolValue)
 	})
 

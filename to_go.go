@@ -78,13 +78,32 @@ func structEventResourceToGoStruct(value cadence.Value, dist any) (err error) {
 					}
 				}
 			} else {
-				fieldV.Set(reflect.ValueOf(v.ToGoValue()))
+				toGoReflect(v, &fieldV)
 			}
 		} else if err != nil {
 			return err
 		}
 	}
 	return
+}
+
+// toGoReflect. the same as ToGo, but receive reflect.Value
+func toGoReflect(value cadence.Value, dist *reflect.Value) error {
+	fmt.Printf("type: %s", dist.Type())
+	switch dist.Type().String() {
+	default:
+		dist.Set(reflect.ValueOf(value.ToGoValue()))
+		return nil
+	// other
+	case "string": // Cadence String, Address, Path, Character(why?)
+		switch cv := value.(type) {
+		case cadence.Address, cadence.Path:
+			dist.Set(reflect.ValueOf(cv.String()))
+			return nil
+		}
+		dist.Set(reflect.ValueOf(value.ToGoValue()))
+		return nil
+	}
 }
 
 // toGoMap. call this function if type of dist is map kind.

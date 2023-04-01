@@ -89,7 +89,6 @@ func structEventResourceToGoStruct(value cadence.Value, dist any) (err error) {
 
 // toGoReflect. the same as ToGo, but receive reflect.Value
 func toGoReflect(value cadence.Value, dist *reflect.Value) error {
-	fmt.Printf("type: %s", dist.Type())
 	switch dist.Type().String() {
 	default:
 		dist.Set(reflect.ValueOf(value.ToGoValue()))
@@ -149,6 +148,14 @@ func toGoStruct(value cadence.Value, dist any) error {
 	return fmt.Errorf("to go struct: unsupport cadence type: %s", reflect.TypeOf(value))
 }
 
+func isValueAddressOrPath(value cadence.Value) bool {
+	switch value.(type) {
+	case cadence.Address, cadence.Path:
+		return true
+	}
+	return false
+}
+
 // ToGo. Convert cadence types to go.
 // Param 1: cadence value to convert.
 // Param 2: go pointer.
@@ -164,7 +171,7 @@ func ToGo(value cadence.Value, dist any) (err error) {
 	}()
 	goTypeV := value.ToGoValue()
 	// check if optional is nil
-	if goTypeV == nil {
+	if !isValueAddressOrPath(value) && goTypeV == nil {
 		reflect.ValueOf(dist).Elem().Set(reflect.Zero(reflect.TypeOf(dist).Elem()))
 		return
 	}
@@ -200,9 +207,8 @@ func ToGo(value cadence.Value, dist any) (err error) {
 		return nil
 	// other
 	case *string: // Cadence String, Address, Path, Character(why?)
-		switch cv := value.(type) {
-		case cadence.Address, cadence.Path:
-			*v = cv.String()
+		if isValueAddressOrPath(value) {
+			*v = value.String()
 			return
 		}
 		*v = value.ToGoValue().(string)

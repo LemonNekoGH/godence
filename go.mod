@@ -1,4 +1,4 @@
-module github.com/LemonNekoGH/godence
+module github.com/lemonnekogh/godence
 
 go 1.18
 

@@ -7,7 +7,7 @@
 ## Get Started
 install by go get.
 ```
-go get github.com/LemonNekoGH/godence
+go get github.com/lemonnekogh/godence
 ```
 ### Convert Cadence value to Go value
 If you have the following Cadence struct.

@@ -162,6 +162,12 @@ func ToGo(value cadence.Value, dist any) (err error) {
 		// defer function has no return expression.
 		// should use named return value.
 	}()
+	goTypeV := value.ToGoValue()
+	// check if optional is nil
+	if goTypeV == nil {
+		reflect.ValueOf(dist).Elem().Set(reflect.Zero(reflect.TypeOf(dist).Elem()))
+		return
+	}
 	switch v := dist.(type) {
 	// integers
 	case **big.Int: // Cadence Int, Int128, Int256, UInt, UInt128, UInt256

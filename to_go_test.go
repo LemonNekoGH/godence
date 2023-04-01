@@ -35,6 +35,35 @@ func TestToGo(t *testing.T) {
 		assert.EqualError(err, "panic recovered: interface conversion: interface {} is int16, not int8")
 	})
 	// =============
+	// Optional
+	// =============
+	t.Run("Optional", func(t *testing.T) {
+		a := assert.New(t)
+		script := []byte(`pub fun main(): String? { return "Test" }`)
+
+		ret, err := flowCli.ExecuteScriptAtLatestBlock(context.Background(), script, nil)
+		a.NoError(err)
+		a.Equal(ret.Type().ID(), "String?")
+
+		var dist string
+		err = ToGo(ret, &dist)
+		a.Nil(err)
+		a.Equal("Test", dist)
+	})
+	t.Run("Optional, nil", func(t *testing.T) {
+		a := assert.New(t)
+		script := []byte(`pub fun main(): String? { return nil }`)
+
+		ret, err := flowCli.ExecuteScriptAtLatestBlock(context.Background(), script, nil)
+		a.NoError(err)
+		a.Equal(ret.Type().ID(), "Never?")
+
+		var dist string
+		err = ToGo(ret, &dist)
+		a.Nil(err)
+		a.Equal("", dist)
+	})
+	// =============
 	// integers
 	// =============
 	t.Run("cadence Int is big.Int", func(t *testing.T) {

@@ -15,3 +15,8 @@
 # vendor/
 
 coverage.txt
+
+.DS_Store
+.idea/
+*.iml
+._*

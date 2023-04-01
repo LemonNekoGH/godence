@@ -35,6 +35,35 @@ func TestToGo(t *testing.T) {
 		assert.EqualError(err, "panic recovered: interface conversion: interface {} is int16, not int8")
 	})
 	// =============
+	// Optional
+	// =============
+	t.Run("Optional", func(t *testing.T) {
+		a := assert.New(t)
+		script := []byte(`pub fun main(): String? { return "Test" }`)
+
+		ret, err := flowCli.ExecuteScriptAtLatestBlock(context.Background(), script, nil)
+		a.NoError(err)
+		a.Equal(ret.Type().ID(), "String?")
+
+		var dist string
+		err = ToGo(ret, &dist)
+		a.Nil(err)
+		a.Equal("Test", dist)
+	})
+	t.Run("Optional, nil", func(t *testing.T) {
+		a := assert.New(t)
+		script := []byte(`pub fun main(): String? { return nil }`)
+
+		ret, err := flowCli.ExecuteScriptAtLatestBlock(context.Background(), script, nil)
+		a.NoError(err)
+		a.Equal(ret.Type().ID(), "Never?")
+
+		var dist string
+		err = ToGo(ret, &dist)
+		a.Nil(err)
+		a.Equal("", dist)
+	})
+	// =============
 	// integers
 	// =============
 	t.Run("cadence Int is big.Int", func(t *testing.T) {
@@ -1146,4 +1175,41 @@ pub fun main(): String {
 		err = toGoSlice(ret, &dist)
 		assert.EqualError(err, "toGoSlice, panic recoverd: interface conversion: cadence.Value is cadence.String, not cadence.Array")
 	})
+}
+
+func Test_isValueAddressOrPath(t *testing.T) {
+	tests := []struct {
+		name string
+		arg  cadence.Value
+		want bool
+	}{
+		{name: "any", arg: cadence.NewVoid(), want: false},
+		{name: "bool", arg: cadence.NewBool(false), want: false},
+		{name: "string", arg: cadence.NewAddress([8]byte{}), want: true},
+		{name: "string", arg: cadence.NewPath("", ""), want: true},
+		{name: "*big.Int", arg: cadence.NewInt(0), want: false},
+		{name: "int8", arg: cadence.NewInt8(0), want: false},
+		{name: "int16", arg: cadence.NewInt16(0), want: false},
+		{name: "int32", arg: cadence.NewInt32(0), want: false},
+		{name: "int64", arg: cadence.NewInt64(0), want: false},
+		{name: "*big.Int", arg: cadence.NewUInt(0), want: false},
+		{name: "uint8", arg: cadence.NewUInt8(0), want: false},
+		{name: "uint16", arg: cadence.NewUInt16(0), want: false},
+		{name: "uint32", arg: cadence.NewUInt32(0), want: false},
+		{name: "uint64", arg: cadence.NewUInt64(0), want: false},
+		{name: "uint8", arg: cadence.NewWord8(0), want: false},
+		{name: "uint32", arg: cadence.NewWord32(0), want: false},
+		{name: "uint64", arg: cadence.NewWord64(0), want: false},
+		{name: "*big.Int", arg: cadence.NewInt128(0), want: false},
+		{name: "*big.Int", arg: cadence.NewUInt128(0), want: false},
+		{name: "*big.Int", arg: cadence.NewInt256(0), want: false},
+		{name: "*big.Int", arg: cadence.NewUInt256(0), want: false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := isValueAddressOrPath(tt.arg); got != tt.want {
+				t.Errorf("isValueAddressOrPath() = %v, want %v", got, tt.want)
+			}
+		})
+	}
 }

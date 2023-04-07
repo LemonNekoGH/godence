@@ -403,6 +403,56 @@ pub fun main(): SimpleStruct {
 		assert.Equal("LemonNeko", dist.MyName)
 	})
 
+	t.Run("a simple optional struct, nil", func(t *testing.T) {
+		type simpleStruct struct {
+			MyName string
+		}
+		assert := assert.New(t)
+		script := []byte(`
+pub struct SimpleStruct {
+	pub var MyName: String
+
+	init() {
+		self.MyName = "LemonNeko"
+	}
+}
+pub fun main(): SimpleStruct? {
+	return nil
+}`)
+		ret, err := flowCli.ExecuteScriptAtLatestBlock(context.Background(), script, nil)
+		assert.NoError(err)
+
+		dist := simpleStruct{}
+		err = ToGo(ret, &dist)
+		assert.NoError(err)
+		assert.Zero(dist)
+	})
+
+	t.Run("a simple optional struct, not nil", func(t *testing.T) {
+		type simpleStruct struct {
+			MyName string
+		}
+		assert := assert.New(t)
+		script := []byte(`
+pub struct SimpleStruct {
+	pub var MyName: String
+
+	init() {
+		self.MyName = "LemonNeko"
+	}
+}
+pub fun main(): SimpleStruct? {
+	return SimpleStruct()
+}`)
+		ret, err := flowCli.ExecuteScriptAtLatestBlock(context.Background(), script, nil)
+		assert.NoError(err)
+
+		dist := simpleStruct{}
+		err = ToGo(ret, &dist)
+		assert.NoError(err)
+		assert.Equal("LemonNeko", dist.MyName)
+	})
+
 	t.Run("a string string dictionary", func(t *testing.T) {
 		assert := assert.New(t)
 		defer func() {

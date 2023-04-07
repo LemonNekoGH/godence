@@ -138,6 +138,8 @@ func toGoSlice(value cadence.Value, dist any) (err error) {
 // toGoStruct. call this function if type of dist is struct kind.
 func toGoStruct(value cadence.Value, dist any) error {
 	switch v := value.(type) {
+	case cadence.Optional:
+		return toGoStruct(v.Value, dist)
 	case cadence.Struct:
 		return structEventResourceToGoStruct(v, dist)
 	case cadence.Event:
